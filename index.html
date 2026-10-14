@@ -157,8 +157,49 @@ out+=`<div class="cal-head" style="margin-top:12px"><b>${m.toLocaleDateString('d
 return `<div class="calendar"><div class="cal-head"><span>${fmt(t.from)} – ${fmt(t.to)}</span></div>${out}</div>`}
 function fileRow(f,src,id,i,sub){const d=`data-src="${src}" data-id="${id}" data-i="${i}"`;return `<div class="file-row"><span>📎</span><span class="fn" data-fa="open" ${d} style="cursor:pointer"><b style="color:var(--ac2)">${esc(f.name)}</b>${sub?`<br><small>${sub}</small>`:''}</span><button class="x" data-fa="ren" ${d} title="Umbenennen" aria-label="Umbenennen">✏️</button><button class="x" data-fa="del" ${d} title="Löschen" aria-label="Löschen">🗑</button></div>`}
 function filesView(t){const fs=[];Object.keys(t.days).sort().forEach(d=>(t.days[d]||[]).forEach(e=>(e.files||[]).forEach((f,i)=>fs.push({f,date:d,title:e.title||e.type,id:e.id,i}))));return `<div class="files-list">${fs.map(x=>fileRow(x.f,'e',x.id,x.i,`${fmt(x.date)} · ${esc(x.title)}`)).join('')+(t.gfiles||[]).map((f,i)=>fileRow(f,'n','',i,'Allgemeine Anhänge')).join('')||'<p class="empty">Noch keine Anhänge.</p>'}</div>`}
-function entry(e){const c=col.has(e.id);return `<div class="e" data-e="${e.id}"><div class="t"><span class="tg" data-a="tgE" data-id="${e.id}"><b class="tn">${ICON[e.type]||'📌'} ${esc(e.type||'Eigener Eintrag')}</b>${!c&&(e.time||e.title)?`<span class="entry-summary">${esc(e.time)}${e.time&&e.title?' • ':''}${esc(e.title)}</span>`:''}</span><span class="te">${(e.files||[]).length?`<span class="clip" data-a="tgE" data-id="${e.id}" title="Anhang" aria-label="Hat Anhang">📎</span>`:''}<button class="x" data-a="tgE" data-id="${e.id}" aria-label="Auf- oder zuklappen" style="font-size:13px;font-weight:400">${c?'▲':'▼'}</button></span></div>${c?`<div>${e.renameable?`<input data-f="type" placeholder="Name des Eintrags" value="${esc(e.type)}" style="margin-top:6px">`:''}<div class="r"><input data-f="title" placeholder="Titel / Ort" value="${esc(e.title)}"><input data-f="time" type="time" value="${esc(e.time)}"></div><textarea data-f="note" placeholder="Notizen, Buchungsnr., Adresse …" style="margin-top:8px">${esc(e.note)}</textarea>${(e.files||[]).map((f,i)=>fileRow(f,'e',e.id,i)).join('')}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><label class="btn g" style="display:inline-block;margin:0;color:inherit;font-size:14px">📎 Anhang<input type="file" multiple data-a="file" data-id="${e.id}" hidden></label><button class="btn g" data-a="delE" data-id="${e.id}" style="margin:0;color:#c0392b;font-size:14px">🗑 Löschen</button></div></div>`:''}</div>`}
+function entry(e){const c=col.has(e.id);return `<div class="e" data-e="${e.id}"><div class="t"><span class="tg" data-a="tgE" data-id="${e.id}"><b class="tn">${ICON[e.type]||'📌'} ${esc(e.type||'Eigener Eintrag')}</b>${!c&&(e.time||e.title)?`<span class="entry-summary">${esc(e.time)}${e.time&&e.title?' • ':''}${esc(e.title)}</span>`:''}</span><span class="te">${(e.files||[]).length?`<span class="clip" data-a="tgE" data-id="${e.id}" title="Anhang" aria-label="Hat Anhang">📎</span>`:''}<button class="x" data-a="tgE" data-id="${e.id}" aria-label="Auf- oder zuklappen" style="font-size:13px;font-weight:400">${c?'▲':'▼'}</button></span></div>${c?`<div>${e.renameable?`<input data-f="type" placeholder="Name des Eintrags" value="${esc(e.type)}" style="margin-top:6px">`:''}<div class="r"><input data-f="title" placeholder="Titel / Ort" value="${esc(e.title)}"><input data-f="time" type="time" value="${esc(e.time)}"></div><textarea data-f="note" placeholder="Notizen, Buchungsnr., Adresse …" style="margin-top:8px">${esc(e.note)}</textarea>${(e.files||[]).map((f,i)=>fileRow(f,'e',e.id,i)).join('')}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><label class="btn g" style="display:inline-block;margin:0;color:inherit;font-size:14px">📎 Anhang<input type="file" multiple data-a="file" data-id="${e.id}" hidden></label><button class="btn g" data-a="saveCal" data-id="${e.id}" style="margin:0;font-size:14px">📅 In Google Kalender speichern</button><button class="btn g" data-a="delE" data-id="${e.id}" style="margin:0;color:#c0392b;font-size:14px">🗑 Löschen</button></div></div>`:''}</div>`}
 function resize(f){return rd(f).then(u=>new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,900/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.82))};i.onerror=()=>r(null);i.src=u}))}
+async function saveCalendarEvent(trip,date,entry){
+ if(!navigator.onLine)return toast('Google Kalender benötigt eine Internetverbindung. Der Eintrag bleibt lokal gespeichert.');
+ const titlePart=String(entry.title||'').trim();
+ const rawKind=String(entry.type||'').trim();const kind=({'Abfahrt':'Abflug','Aktivitäten':'Aktivität','Übernachtung':'Hotel'})[rawKind]||rawKind;
+ const summary=[kind,titlePart].filter(Boolean).join(' - ')||'Reiseeintrag';
+ if(!date||!/^\d{4}-\d{2}-\d{2}$/.test(date))return toast('Für diesen Eintrag ist kein gültiges Datum vorhanden.');
+ try{
+  if(!(await ensureTok()))return toast('Google-Anmeldung erforderlich. Bitte erneut anmelden und Kalenderzugriff erlauben.');
+  const zone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
+  const event={summary,description:String(entry.note||''),extendedProperties:{private:{worldPlannerEntryId:String(entry.id),worldPlannerTripId:String(trip.id)}}};
+  if(entry.location||entry.address)event.location=String(entry.location||entry.address);
+  if(entry.time){
+   const hm=/^(\d{2}):(\d{2})$/.exec(entry.time);
+   if(!hm)return toast('Die Uhrzeit dieses Eintrags ist ungültig.');
+   const start=new Date(date+'T'+entry.time+':00');
+   if(Number.isNaN(start.getTime()))return toast('Datum oder Uhrzeit ist ungültig.');
+   let duration=Number(entry.durationMinutes||entry.duration||60);
+   if(!Number.isFinite(duration)||duration<=0)duration=60;
+   if(duration<10&&entry.duration)duration*=60;
+   const end=new Date(start.getTime()+duration*60000);
+   const localDateTime=d=>{const parts=new Intl.DateTimeFormat('sv-SE',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(d).replace(' ','T');return parts};
+   event.start={dateTime:localDateTime(start),timeZone:zone};
+   event.end={dateTime:localDateTime(end),timeZone:zone};
+  }else{
+   const next=new Date(date+'T12:00:00');next.setDate(next.getDate()+1);
+   event.start={date};event.end={date:next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0')+'-'+String(next.getDate()).padStart(2,'0')};
+  }
+  const base='https://www.googleapis.com/calendar/v3/calendars/primary/events';
+  let response;
+  if(entry.calendarEventId){
+   response=await fetch(base+'/'+encodeURIComponent(entry.calendarEventId),{method:'PUT',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(event)});
+   if(response.status===404){delete entry.calendarEventId;response=null}
+  }
+  if(!response)response=await fetch(base,{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(event)});
+  if(response.status===401){tok=null;tokExp=0;return toast('Google-Sitzung abgelaufen. Bitte erneut anmelden und nochmals speichern.')}
+  if(response.status===403){let msg='Google Kalenderzugriff fehlt. Bitte Anmeldung wiederholen und den Kalenderzugriff erlauben.';try{const j=await response.json();if(j.error&&j.error.message)msg+=' '+j.error.message}catch(_){}return toast(msg)}
+  if(!response.ok)throw new Error('Calendar API '+response.status);
+  const saved=await response.json();if(!saved.id)throw new Error('Keine Ereignis-ID von Google erhalten.');
+  entry.calendarEventId=saved.id;save();render();toast('Google-Kalendertermin gespeichert.');
+ }catch(err){console.error('World Planner calendar save failed',err);toast('Kalendertermin konnte nicht gespeichert werden. Bitte Verbindung und Google-Berechtigung prüfen.')}
+}
 function findE(id){for(const t of S.trips)for(const d in t.days){const e=t.days[d].find(x=>x.id===id);if(e)return[t,d,e]}return[]}
 function rd(f){return new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f)})}
 $.addEventListener('click',e=>{const el=e.target.closest('[data-a]');if(!el||el.tagName==='INPUT'||el.tagName==='SELECT')return;const a=el.dataset.a,t=S.trips.find(x=>x.id===cur);
@@ -187,7 +228,7 @@ else if(a==='tgE'){const i=el.dataset.id;col.has(i)?col.delete(i):col.add(i)}
 else if(a==='pic'){ps=true}else if(a==='picx'){ps=false}
 else if(a==='rmimg'){t.img=null;ps=false;save()}
 else if(a==='files'){om=false;t.tab='files';save()}
-else if(a==='delE'){const[tt,d,en]=findE(el.dataset.id);ask('Eintrag „'+(en.type||'Eigener Eintrag')+'“ löschen?',()=>{tt.days[d]=tt.days[d].filter(x=>x!==en)})}
+else if(a==='saveCal'){const found=findE(el.dataset.id);if(found.length)saveCalendarEvent(found[0],found[1],found[2]);else toast('Eintrag wurde nicht gefunden')} else if(a==='delE'){const[tt,d,en]=findE(el.dataset.id);ask('Eintrag „'+(en.type||'Eigener Eintrag')+'“ löschen?',()=>{tt.days[d]=tt.days[d].filter(x=>x!==en)})}
 else if(a==='exp'){om=false;menu=false;render();return exportX(t?[t]:S.trips)}
 else return;
 render()});
@@ -324,9 +365,9 @@ addEventListener('popstate',()=>{if(window._ph){window._ph=false;return}if(pv)le
 <script>
 /* ===== Google Drive Sync (appDataFolder) ===== */
 const GCLIENT_ID='800869135180-hs1knj340b4e703uq92ktkis0vfkogd1.apps.googleusercontent.com';
-const GSCOPE='https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email';
+const GSCOPE='https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.events';
 const API='https://www.googleapis.com/drive/v3/files',UP='https://www.googleapis.com/upload/drive/v3/files';
-let persSnap,tok=null,tokExp=0,tc=null,busy=false,snap={},st='off',stT;
+let persSnap,tok=null,tokExp=0,tc=null,busy=false,snap={},st='off',stT,authPromise=null;
 const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
 const LBL={off:'☁️ Anmelden',sync:'🔄 Sync …',ok:'☁️ Synchronisiert',offline:'📴 Offline',err:'⚠️ Sync-Fehler'};
 function setSt(s){st=s}setSt('off');
@@ -347,7 +388,9 @@ const _put=put;
 put=function(){try{stamp()}catch(e){}_put();schedule()};
 let sT;function schedule(){clearTimeout(sT);sT=setTimeout(()=>sync(),4000)}
 
-function signIn(interactive){return new Promise(res=>{
+function signIn(interactive){
+ if(authPromise)return authPromise;
+ authPromise=new Promise(res=>{
  if(!window.google||!google.accounts){if(interactive)toast('Google-Login braucht Internet');return res(false)}
  tc=tc||google.accounts.oauth2.initTokenClient({client_id:GCLIENT_ID,scope:GSCOPE,callback:async r=>{
   if(!r||!r.access_token){setSt('off');return res(false)}
