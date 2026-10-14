@@ -1,8 +1,8 @@
 [{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "HIER.DEIN.PACKAGE.NAME",
-    "sha256_cert_fingerprints": ["AA:BB:CC:...HIER_DEN_SHA256_FINGERPRINT_EINTRAGEN"]
-  }
-}]
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.worldplanner.twa",
+        "sha256_cert_fingerprints": ["27:4C:F0:E8:3F:40:08:0B:2C:B8:EE:3B:78:66:8F:56:59:88:68:92:CA:AC:8F:04:B1:C6:31:40:33:C6:A4:1B"]
+      }
+    }]
