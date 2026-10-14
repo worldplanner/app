@@ -193,7 +193,7 @@ async function saveCalendarEvent(trip,date,entry){
    if(response.status===404){delete entry.calendarEventId;response=null}
   }
   if(!response)response=await fetch(base,{method:'POST',headers:{Authorization:'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(event)});
-  if(response.status===401){tok=null;tokExp=0;return toast('Google-Sitzung abgelaufen. Bitte erneut anmelden und nochmals speichern.')}
+  if(response.status===401){clrTok();return toast('Google-Sitzung abgelaufen. Bitte erneut anmelden und nochmals speichern.')}
   if(response.status===403){let msg='Google Kalenderzugriff fehlt. Bitte Anmeldung wiederholen und den Kalenderzugriff erlauben.';try{const j=await response.json();if(j.error&&j.error.message)msg+=' '+j.error.message}catch(_){}return toast(msg)}
   if(!response.ok)throw new Error('Calendar API '+response.status);
   const saved=await response.json();if(!saved.id)throw new Error('Keine Ereignis-ID von Google erhalten.');
@@ -369,12 +369,15 @@ const GSCOPE='https://www.googleapis.com/auth/drive.appdata https://www.googleap
 const API='https://www.googleapis.com/drive/v3/files',UP='https://www.googleapis.com/upload/drive/v3/files';
 let persSnap,tok=null,tokExp=0,tc=null,busy=false,snap={},st='off',stT,authPromise=null;
 const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+function clrTok(){tok=null;tokExp=0;LS.set('gd_tok','')}
+/* Gültigen Token vom letzten Start weiterverwenden (Google-Tokens halten ca. 1 Std.) */
+try{const c=JSON.parse(LS.get('gd_tok')||'null');if(c&&c.t&&c.e>Date.now()){tok=c.t;tokExp=c.e}}catch(e){}
 const LBL={off:'☁️ Anmelden',sync:'🔄 Sync …',ok:'☁️ Synchronisiert',offline:'📴 Offline',err:'⚠️ Sync-Fehler'};
 function setSt(s){st=s}setSt('off');
 function authLabel(){return tok?`☁️ Abmelden<small style="display:block;opacity:.6;font-weight:400">${LBL[st]}</small>`:'☁️ Anmelden'}
 $.addEventListener('click',e=>{const el=e.target.closest('[data-pg]');if(!el)return;menu=false;
  if(!tok)signIn(true);
- else ask('Wirklich von Google abmelden? Deine Reisen bleiben auf diesem Gerät, werden aber nicht mehr synchronisiert.',()=>{tok=null;tokExp=0;LS.set('gd_on','');setSt('off')},'Abmelden')
+ else ask('Wirklich von Google abmelden? Deine Reisen bleiben auf diesem Gerät, werden aber nicht mehr synchronisiert.',()=>{clrTok();LS.set('gd_on','');setSt('off')},'Abmelden')
  render()});
 
 function stamp(){const ids=new Set();
@@ -394,16 +397,23 @@ function signIn(interactive){
  if(!window.google||!google.accounts){if(interactive)toast('Google-Login braucht Internet');return res(false)}
  tc=tc||google.accounts.oauth2.initTokenClient({client_id:GCLIENT_ID,scope:GSCOPE,callback:async r=>{
   if(!r||!r.access_token){setSt('off');return res(false)}
-  const old=tok;tok=r.access_token;tokExp=Date.now()+(r.expires_in-120)*1000;
+  const old=tok;tok=r.access_token;tokExp=Date.now()+(r.expires_in-120)*1000;LS.set('gd_tok',JSON.stringify({t:tok,e:tokExp}));
   try{const u=await (await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+tok}})).json();
    const own=LS.get('gd_owner');
-   if(own&&own!==u.email){tok=null;google.accounts.oauth2.revoke(r.access_token);toast('Nur das Konto '+own+' ist erlaubt');setSt('off');return res(false)}
+   if(own&&own!==u.email){clrTok();google.accounts.oauth2.revoke(r.access_token);toast('Nur das Konto '+own+' ist erlaubt');setSt('off');return res(false)}
    LS.set('gd_owner',u.email)}catch(e){}
   LS.set('gd_on','1');res(true);if(!old)sync()},
-  error_callback:()=>{setSt('off');res(false)}});
- tc.requestAccessToken({prompt:interactive?(LS.get('gd_owner')?'':'select_account'):''})})}
-async function ensureTok(){if(tok&&Date.now()<tokExp)return true;tok=null;return signIn(false)}
-async function g(url,o={}){o.headers={...(o.headers||{}),Authorization:'Bearer '+tok};const r=await fetch(url,o);if(!r.ok&&r.status!==404)throw new Error(r.status);return r}
+  error_callback:e=>{window._authErr=e&&e.type;setSt('off');res(false)}});
+ const o={prompt:interactive?(LS.get('gd_owner')?'':'select_account'):''},h=LS.get('gd_owner');if(h)o.hint=h;
+ try{tc.requestAccessToken(o)}catch(e){res(false)}});
+ const p=authPromise;p.then(()=>{if(authPromise===p)authPromise=null},()=>{if(authPromise===p)authPromise=null});
+ return p}
+let reauthArmed=false;
+/* Ohne Fingertipp blockiert der Browser das Google-Fenster. Dann beim nächsten Tippen leise erneuern (Konto ist per hint vorgegeben). */
+function armReauth(){if(reauthArmed||!LS.get('gd_on'))return;reauthArmed=true;
+ addEventListener('click',()=>{reauthArmed=false;if(!tok||Date.now()>=tokExp)signIn(false)},{once:true,capture:true})}
+async function ensureTok(){if(tok&&Date.now()<tokExp)return true;tok=null;window._authErr=null;const ok=await signIn(false);if(!ok&&window._authErr==='popup_failed_to_open')armReauth();return ok}
+async function g(url,o={}){o.headers={...(o.headers||{}),Authorization:'Bearer '+tok};const r=await fetch(url,o);if(r.status===401)clrTok();if(!r.ok&&r.status!==404)throw new Error(r.status);return r}
 async function list(){const m={};let pt='';do{
  const j=await (await g(API+'?spaces=appDataFolder&pageSize=1000&fields=nextPageToken,files(id,name,appProperties)'+(pt?'&pageToken='+pt:''))).json();
  (j.files||[]).forEach(f=>{const x=/^trip_(.+)\.json$/.exec(f.name),k=x?x[1]:(f.name==='personal.json'?'__pers':null);if(k)m[k]={fid:f.id,mod:+(f.appProperties&&f.appProperties.mod||0)}});pt=j.nextPageToken}while(pt);return m}

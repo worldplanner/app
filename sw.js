@@ -1,5 +1,5 @@
 /* World Planner offline shell. Bump CACHE_VERSION after each deployment. */
-const CACHE_VERSION = 'world-planner-v4';
+const CACHE_VERSION = 'world-planner-v5';
 const SHELL = [
   './',
   './index.html',
