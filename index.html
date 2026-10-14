@@ -228,7 +228,7 @@ else if(a==='tgE'){const i=el.dataset.id;col.has(i)?col.delete(i):col.add(i)}
 else if(a==='pic'){ps=true}else if(a==='picx'){ps=false}
 else if(a==='rmimg'){t.img=null;ps=false;save()}
 else if(a==='files'){om=false;t.tab='files';save()}
-else if(a==='saveCal'){const found=findE(el.dataset.id);if(found.length)saveCalendarEvent(found[0],found[1],found[2]);else toast('Eintrag wurde nicht gefunden')} else if(a==='delE'){const[tt,d,en]=findE(el.dataset.id);ask('Eintrag „'+(en.type||'Eigener Eintrag')+'“ löschen?',()=>{tt.days[d]=tt.days[d].filter(x=>x!==en)})}
+else if(a==='saveCal'){const found=findE(el.dataset.id);if(found.length){const[ct,cd,ce]=found,upd=!!ce.calendarEventId,nm=[ce.type||'Eigener Eintrag',String(ce.title||'').trim()].filter(Boolean).join(' – ');ask('Eintrag „'+nm+'“ vom '+fmt(cd)+(upd?' im Google Kalender aktualisieren?':' in deinen Google Kalender exportieren?'),()=>{saveCalendarEvent(ct,cd,ce)},upd?'Aktualisieren':'Exportieren')}else toast('Eintrag wurde nicht gefunden')} else if(a==='delE'){const[tt,d,en]=findE(el.dataset.id);ask('Eintrag „'+(en.type||'Eigener Eintrag')+'“ löschen?',()=>{tt.days[d]=tt.days[d].filter(x=>x!==en)})}
 else if(a==='exp'){om=false;menu=false;render();return exportX(t?[t]:S.trips)}
 else return;
 render()});
