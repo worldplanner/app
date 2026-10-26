@@ -565,7 +565,7 @@ let mapTok=0,mapSt=null,mapFocus=null,gBroken=false;
 const geoFail=new Set();
 (function(){const st=document.createElement('style');st.textContent=
 '.tabs{gap:4px}.tabs button{padding:8px 4px;font-size:15px;min-width:0;white-space:nowrap}.tabs button.active{flex:2.4}.tabs .ti{font-size:19px;line-height:1;vertical-align:-2px}'+
-'.mapbox{position:relative;height:58vh;min-height:320px;border-radius:14px;overflow:hidden;border:1px solid var(--bd);background:var(--card);touch-action:none}#mapel{position:absolute;inset:0}'+
+'.mapbox{position:relative;z-index:0;isolation:isolate;height:58vh;min-height:320px;border-radius:14px;overflow:hidden;border:1px solid var(--bd);background:var(--card);touch-action:none}#mapel{position:absolute;inset:0}'+
 '.pin{width:34px;height:34px;border-radius:50%;background:var(--ac,#c8b4f0);border:2px solid #fff;box-shadow:0 3px 9px rgba(40,30,80,.4);display:grid;place-items:center;font-size:17px;line-height:1}'+
 '.mapnote{font-size:13px;color:var(--mut);margin:10px 2px}.mapbar{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}.mapbar button{font-size:14px}'+
 '.mrow{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;cursor:pointer}.mrow .mi{font-size:20px}.mrow .mt{flex:1;min-width:0}.mrow .mt b,.mrow .mt small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mrow .mt small{color:var(--mut);font-size:12px}.mrow .ms{font-size:15px}.mrow .mg{color:var(--ac2);text-decoration:none;font-size:20px;padding:4px 8px}'+
