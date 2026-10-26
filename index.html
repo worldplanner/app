@@ -125,7 +125,7 @@ const ask=(msg,fn,lbl)=>{cf={msg,fn,lbl}};
 function render(){let t=S.trips.find(x=>x.id===cur);if(cur&&!t)cur=null;t?tripView(t):listView();extra(t)}
 function extra(t){let h='';const sh=(b,bd)=>h+=`<div class="ov dim"${bd?` data-bd="${bd}"`:''}><div class="card add sheet">${b}</div></div>`;
 if(stg){const cu=window._themeId||'flieder',sw=d=>THEMES.filter(x=>!!x.dark===d).map(x=>`<div class="swi"><button class="sw${x.id===cu?' on':''}" data-a="theme" data-id="${x.id}" title="${x.name}" aria-label="${x.name}" style="background:linear-gradient(135deg,${x.bg} 50%,${x.ac} 50%)"></button><small>${x.name}</small></div>`).join('');
- sh(`<b>Einstellungen</b><label>Konto</label><button class="g" data-pg="auth" style="width:100%;text-align:left">${authLabel()}</button><label>Farben</label><div class="stg-h">Hell</div><div class="swg">${sw(false)}</div><div class="stg-h">Dunkel</div><div class="swg">${sw(true)}</div><label>Sprache</label><select aria-label="Sprache"><option>Deutsch</option></select><div class="stg-h">Weitere Sprachen folgen später.</div><button class="g" data-a="stgx" style="margin-top:12px;width:100%">Schließen</button>`,'stg')}
+ sh(`<b>Einstellungen</b><label>Konto</label><button class="g" data-pg="auth" style="width:100%;text-align:left">${authLabel()}</button><label>Farben</label><div class="stg-h">Hell</div><div class="swg">${sw(false)}</div><div class="stg-h">Dunkel</div><div class="swg">${sw(true)}</div><label>Karte</label><input data-gk="1" placeholder="Google-Maps-API-Schlüssel (optional)" value="${esc(LS.get('gmaps_key')||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="stg-h">Ohne Schlüssel wird OpenStreetMap als Karte genutzt. Mit Schlüssel (Maps JavaScript API + Geocoding API) die Google-Karte.</div><label>Sprache</label><select aria-label="Sprache"><option>Deutsch</option></select><div class="stg-h">Weitere Sprachen folgen später.</div><button class="g" data-a="stgx" style="margin-top:12px;width:100%">Schließen</button>`,'stg')}
 if(pm&&t){h+=`<div class="ov dim" data-a="pmx"><div class="card add sheet"><b>Hinzufügen</b><div class="pmenu">${TYPES.map(k=>`<button data-a="addE" data-d="${pm}" data-k="${k}">${ICON[k]||'📌'} ${k}</button>`).join('')}</div></div></div>`}
 if(om&&t)h+=`<div class="ov dim option-backdrop" data-a="optx"><div class="card add sheet"><b>Optionen</b><div class="pmenu"><button data-a="edT">✏️ Umbenennen &amp; Datum ändern</button><button data-a="exp">⬇ Als Excel exportieren</button><button data-a="files">📎 Anhänge</button><button data-a="del">🗑 Reise löschen</button></div></div></div>`;
 if(ed&&t)sh(`<b>Reise bearbeiten</b><div><label>Reiseziel</label><input id="ed_d" value="${esc(t.dest)}"></div><div><label>Von</label><input id="ed_f" type="date" value="${t.from}"></div><div><label>Bis</label><input id="ed_t" type="date" value="${t.to}"></div><label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px"><input id="ed_m" type="checkbox" checked style="width:auto"> Einträge mit neuem Startdatum verschieben</label><div style="display:flex;gap:8px"><button data-a="saveT">Speichern</button><button class="g" data-a="edx">Abbrechen</button></div>`,'ed');
@@ -145,8 +145,8 @@ const summary=ds.flatMap(d=>t.days[d]||[]).length;
 let body='';
 if(tab==='days') body=`<div class="pad">${ds.map((d,i)=>{const es=t.days[d]||[],o=open.has(d),isToday=d===today;return `<div class="card day${isToday?' today-card':''}" data-d="${d}"><div class="h" data-a="tog" data-d="${d}"><div style="flex:1">${isToday?'<span class="today-label">Heute</span><br>':''}<b class="dnm">${i+1}</b> • ${fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})}${t.dn[d]?` • <b>${esc(t.dn[d])}</b>`:''}</div><span class="n">${es.map(x=>ICON[x.type]||'📌').join(' ')} ${o?'▲':'▼'}</span></div>${o?`<div class="b"><label>Name des Tages</label><input data-f="dn" data-d="${d}" placeholder="Tag ${i+1}" value="${esc(t.dn[d]||'')}">${es.map(entry).join('')}<button class="g plus" data-a="addm" data-d="${d}">+ Hinzufügen</button></div>`:''}</div>`}).join('')}</div>`;
 if(tab==='calendar') body=calendarView(t);
-if(tab==='files') body=filesView(t);if(tab==='notes') body=notesView(t);
-$.innerHTML=`<div class="hero${t.img?'':' noimg'}" style="background:${bgOf(t)}"><div class="r0"><button class="av" data-a="pic">${t.img?`<img src="${t.img}">`:esc((t.dest||'?')[0])}<span class="cam">+</span></button><div><h1>${esc(t.dest)}</h1><p>${fmt(t.from)} – ${fmt(t.to)} · ${ds.length} Tage · ${summary} Einträge</p></div></div><div class="row"><button class="g" data-a="back">← Reisen</button><button class="g" data-a="opt" aria-label="Optionen">⋯</button></div></div><div class="tabs"><button class="${tab==='days'?'active':''}" data-a="tab" data-tab="days">Tage</button><button class="${tab==='notes'?'active':''}" data-a="tab" data-tab="notes">Notizen</button><button class="${tab==='calendar'?'active':''}" data-a="tab" data-tab="calendar">Kalender</button><button class="${tab==='files'?'active':''}" data-a="tab" data-tab="files">Anhänge</button></div>${ps?`<div class="ov dim" data-bd="ps"><div class="card add sheet"><b>Reisebild</b><label class="btn" style="margin:0;text-align:center;color:#fff">📷 Bild aus Galerie<input type="file" accept="image/*" data-a="img" hidden></label><div class="img-search"><input id="imgq" placeholder="Bild suchen …" value="${esc(t.dest)}"><button data-a="imgSearch">Suchen</button></div><div id="imgres" class="img-results"></div><small style="color:var(--mut)">Bilder werden direkt aus Wikimedia Commons geladen – antippen zum Auswählen.</small>${t.img?'<button class="g" data-a="rmimg">Bild entfernen</button>':''}<button class="g" data-a="picx">Abbrechen</button></div></div>`:''}<div class="tabbody">${body}</div>`;
+if(tab==='files') body=filesView(t);if(tab==='notes') body=notesView(t);if(tab==='map') body=mapView(t);
+$.innerHTML=`<div class="hero${t.img?'':' noimg'}" style="background:${bgOf(t)}"><div class="r0"><button class="av" data-a="pic">${t.img?`<img src="${t.img}">`:esc((t.dest||'?')[0])}<span class="cam">+</span></button><div><h1>${esc(t.dest)}</h1><p>${fmt(t.from)} – ${fmt(t.to)} · ${ds.length} Tage · ${summary} Einträge</p></div></div><div class="row"><button class="g" data-a="back">← Reisen</button><button class="g" data-a="opt" aria-label="Optionen">⋯</button></div></div><div class="tabs"><button class="${tab==='days'?'active':''}" data-a="tab" data-tab="days">Tage</button><button class="${tab==='notes'?'active':''}" data-a="tab" data-tab="notes">Notizen</button><button class="${tab==='calendar'?'active':''}" data-a="tab" data-tab="calendar">Kalender</button><button class="${tab==='map'?'active':''}" data-a="tab" data-tab="map">Karte</button><button class="${tab==='files'?'active':''}" data-a="tab" data-tab="files">Anhänge</button></div>${ps?`<div class="ov dim" data-bd="ps"><div class="card add sheet"><b>Reisebild</b><label class="btn" style="margin:0;text-align:center;color:#fff">📷 Bild aus Galerie<input type="file" accept="image/*" data-a="img" hidden></label><div class="img-search"><input id="imgq" placeholder="Bild suchen …" value="${esc(t.dest)}"><button data-a="imgSearch">Suchen</button></div><div id="imgres" class="img-results"></div><small style="color:var(--mut)">Bilder werden direkt aus Wikimedia Commons geladen – antippen zum Auswählen.</small>${t.img?'<button class="g" data-a="rmimg">Bild entfernen</button>':''}<button class="g" data-a="picx">Abbrechen</button></div></div>`:''}<div class="tabbody">${body}</div>`;
 if(ps)setTimeout(()=>searchImages(t.dest),0);
 }
 let calSel=null;
@@ -157,7 +157,7 @@ out+=`<div class="cal-head" style="margin-top:12px"><b>${m.toLocaleDateString('d
 return `<div class="calendar"><div class="cal-head"><span>${fmt(t.from)} – ${fmt(t.to)}</span></div>${out}</div>`}
 function fileRow(f,src,id,i,sub){const d=`data-src="${src}" data-id="${id}" data-i="${i}"`;return `<div class="file-row"><span>📎</span><span class="fn" data-fa="open" ${d} style="cursor:pointer"><b style="color:var(--ac2)">${esc(f.name)}</b>${sub?`<br><small>${sub}</small>`:''}</span><button class="x" data-fa="ren" ${d} title="Umbenennen" aria-label="Umbenennen">✏️</button><button class="x" data-fa="del" ${d} title="Löschen" aria-label="Löschen">🗑</button></div>`}
 function filesView(t){const fs=[];Object.keys(t.days).sort().forEach(d=>(t.days[d]||[]).forEach(e=>(e.files||[]).forEach((f,i)=>fs.push({f,date:d,title:e.title||e.type,id:e.id,i}))));return `<div class="files-list">${fs.map(x=>fileRow(x.f,'e',x.id,x.i,`${fmt(x.date)} · ${esc(x.title)}`)).join('')+(t.gfiles||[]).map((f,i)=>fileRow(f,'n','',i,'Allgemeine Anhänge')).join('')||'<p class="empty">Noch keine Anhänge.</p>'}</div>`}
-function entry(e){const c=col.has(e.id);return `<div class="e" data-e="${e.id}"><div class="t"><span class="tg" data-a="tgE" data-id="${e.id}"><b class="tn">${ICON[e.type]||'📌'} ${esc(e.type||'Eigener Eintrag')}</b>${!c&&(e.time||e.title)?`<span class="entry-summary">${esc(e.time)}${e.time&&e.title?' • ':''}${esc(e.title)}</span>`:''}</span><span class="te">${(e.files||[]).length?`<span class="clip" data-a="tgE" data-id="${e.id}" title="Anhang" aria-label="Hat Anhang">📎</span>`:''}<button class="x" data-a="tgE" data-id="${e.id}" aria-label="Auf- oder zuklappen" style="font-size:13px;font-weight:400">${c?'▲':'▼'}</button></span></div>${c?`<div>${e.renameable?`<input data-f="type" placeholder="Name des Eintrags" value="${esc(e.type)}" style="margin-top:6px">`:''}<div class="r"><input data-f="title" placeholder="Titel / Ort" value="${esc(e.title)}"><input data-f="time" type="time" value="${esc(e.time)}"></div><textarea data-f="note" placeholder="Notizen, Buchungsnr., Adresse …" style="margin-top:8px">${esc(e.note)}</textarea>${(e.files||[]).map((f,i)=>fileRow(f,'e',e.id,i)).join('')}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><label class="btn g" style="display:inline-block;margin:0;color:inherit;font-size:14px">📎 Anhang<input type="file" multiple data-a="file" data-id="${e.id}" hidden></label><button class="btn g" data-a="saveCal" data-id="${e.id}" style="margin:0;font-size:14px">📅 Kalender</button><button class="btn g" data-a="delE" data-id="${e.id}" style="margin:0;color:#c0392b;font-size:14px">🗑 Löschen</button></div></div>`:''}</div>`}
+function entry(e){const c=col.has(e.id);return `<div class="e" data-e="${e.id}"><div class="t"><span class="tg" data-a="tgE" data-id="${e.id}"><b class="tn">${ICON[e.type]||'📌'} ${esc(e.type||'Eigener Eintrag')}</b>${!c&&(e.time||e.title)?`<span class="entry-summary">${esc(e.time)}${e.time&&e.title?' • ':''}${esc(e.title)}</span>`:''}</span><span class="te">${e.loc?`<span class="clip" data-a="tgE" data-id="${e.id}" title="Ort">📍</span>`:''}${(e.files||[]).length?`<span class="clip" data-a="tgE" data-id="${e.id}" title="Anhang" aria-label="Hat Anhang">📎</span>`:''}<button class="x" data-a="tgE" data-id="${e.id}" aria-label="Auf- oder zuklappen" style="font-size:13px;font-weight:400">${c?'▲':'▼'}</button></span></div>${c?`<div>${e.renameable?`<input data-f="type" placeholder="Name des Eintrags" value="${esc(e.type)}" style="margin-top:6px">`:''}<div class="r"><input data-f="title" placeholder="Titel / Ort" value="${esc(e.title)}"><input data-f="time" type="time" value="${esc(e.time)}"></div><input data-f="loc" placeholder="📍 Ort / Adresse (für die Karte)" value="${esc(e.loc)}" style="margin-top:8px"><textarea data-f="note" placeholder="Notizen, Buchungsnr. …" style="margin-top:8px">${esc(e.note)}</textarea>${(e.files||[]).map((f,i)=>fileRow(f,'e',e.id,i)).join('')}<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><label class="btn g" style="display:inline-block;margin:0;color:inherit;font-size:14px">📎 Anhang<input type="file" multiple data-a="file" data-id="${e.id}" hidden></label><button class="btn g" data-a="saveCal" data-id="${e.id}" style="margin:0;font-size:14px">📅 Kalender</button>${e.loc?`<button class="btn g" data-mp="goE" data-id="${e.id}" style="margin:0;font-size:14px">🗺️ Karte</button>`:''}<button class="btn g" data-a="delE" data-id="${e.id}" style="margin:0;color:#c0392b;font-size:14px">🗑 Löschen</button></div></div>`:''}</div>`}
 function resize(f){return rd(f).then(u=>new Promise(r=>{const i=new Image();i.onload=()=>{const k=Math.min(1,900/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=i.width*k;c.height=i.height*k;c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.82))};i.onerror=()=>r(null);i.src=u}))}
 async function saveCalendarEvent(trip,date,entry){
  if(!navigator.onLine)return toast('Google Kalender benötigt eine Internetverbindung. Der Eintrag bleibt lokal gespeichert.');
@@ -169,7 +169,7 @@ async function saveCalendarEvent(trip,date,entry){
   if(!(await ensureTok()))return toast('Google-Anmeldung erforderlich. Bitte erneut anmelden und Kalenderzugriff erlauben.');
   const zone=Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';
   const event={summary,description:String(entry.note||''),extendedProperties:{private:{worldPlannerEntryId:String(entry.id),worldPlannerTripId:String(trip.id)}}};
-  if(entry.location||entry.address)event.location=String(entry.location||entry.address);
+  {const locStr=entry.loc||entry.location||entry.address;if(locStr)event.location=String(locStr)}
   if(entry.time){
    const hm=/^(\d{2}):(\d{2})$/.exec(entry.time);
    if(!hm)return toast('Die Uhrzeit dieses Eintrags ist ungültig.');
@@ -246,9 +246,9 @@ const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=
 async function saveF(f){try{const b=atob(f.data.split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);const mime=(f.data.match(/^data:([^;,]+)/)||[])[1];if(await saveBlob(f.name,u,mime))toast('Gespeichert')}catch(e){toast('Speichern fehlgeschlagen')}}
 async function exportX(L){
 if(typeof XLSX==='undefined')return toast('Excel-Bibliothek nicht geladen (Internet nötig)');
-const R=[],E=[];L.forEach(t=>{R.push({ID:t.id,Ziel:t.dest,Von:t.from,Bis:t.to});Object.keys(t.days).sort().forEach(d=>t.days[d].forEach(e=>E.push({ReiseID:t.id,Reise:t.dest,Datum:d,Bereich:e.type,Titel:e.title,Uhrzeit:e.time,Notiz:e.note,Anhänge:(e.files||[]).map(f=>f.name).join(', '),ID:e.id})))});
+const R=[],E=[];L.forEach(t=>{R.push({ID:t.id,Ziel:t.dest,Von:t.from,Bis:t.to});Object.keys(t.days).sort().forEach(d=>t.days[d].forEach(e=>E.push({ReiseID:t.id,Reise:t.dest,Datum:d,Bereich:e.type,Titel:e.title,Uhrzeit:e.time,Notiz:e.note,Ort:e.loc||'',Anhänge:(e.files||[]).map(f=>f.name).join(', '),ID:e.id})))});
 const D=[];L.forEach(t=>Object.entries(t.dn||{}).forEach(([d,n])=>n&&D.push({ReiseID:t.id,Datum:d,Name:n})));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(R,{header:['ID','Ziel','Von','Bis']}),'Reisen');
-XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(E,{header:['ReiseID','Reise','Datum','Bereich','Titel','Uhrzeit','Notiz','Anhänge','ID']}),'Einträge');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D,{header:['ReiseID','Datum','Name']}),'Tage');
+XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(E,{header:['ReiseID','Reise','Datum','Bereich','Titel','Uhrzeit','Notiz','Ort','Anhänge','ID']}),'Einträge');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D,{header:['ReiseID','Datum','Name']}),'Tage');
 const data=new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
 const name='Urlaub_'+(L.length===1?L[0].dest.replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_'):'Alle')+'.xlsx';try{if(await saveBlob(name,data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))toast('Export gespeichert')}catch(e){toast('Export fehlgeschlagen')}}
 const hm=v=>v instanceof Date?String(v.getHours()).padStart(2,'0')+':'+String(v.getMinutes()).padStart(2,'0'):typeof v==='number'?String(Math.floor(v*24)%24).padStart(2,'0')+':'+String(Math.round(v*1440)%60).padStart(2,'0'):String(v);
@@ -257,7 +257,7 @@ async function importX(file){menu=false;
 const wb=XLSX.read(await file.arrayBuffer(),{cellDates:true});const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{raw:true,defval:''}):[];
 let nt=0,ne=0;sh('Reisen').forEach(r=>{const id=String(r.ID||uid()),from=ds(r.Von),to=ds(r.Bis);if(!r.Ziel||!from||!to)return;let t=S.trips.find(x=>x.id===id);if(!t){t={id,days:{}};S.trips.push(t);nt++}Object.assign(t,{dest:String(r.Ziel),from,to})});
 const keep={};S.trips.forEach(t=>Object.values(t.days).flat().forEach(e=>keep[e.id]=e.files));
-const touched=new Set();sh('Einträge').forEach(r=>{const t=S.trips.find(x=>x.id===String(r.ReiseID));if(!t)return;if(!touched.has(t.id)){touched.add(t.id);t.days={}}const d=ds(r.Datum),id=String(r.ID||uid());(t.days[d]=t.days[d]||[]).push({id,type:String(r.Bereich),custom:!TYPES.includes(r.Bereich),renameable:r.Bereich==='Sonstiges'||!TYPES.includes(r.Bereich),title:String(r.Titel),time:hm(r.Uhrzeit),note:String(r.Notiz),files:keep[id]||[]});ne++});
+const touched=new Set();sh('Einträge').forEach(r=>{const t=S.trips.find(x=>x.id===String(r.ReiseID));if(!t)return;if(!touched.has(t.id)){touched.add(t.id);t.days={}}const d=ds(r.Datum),id=String(r.ID||uid());(t.days[d]=t.days[d]||[]).push({id,type:String(r.Bereich),custom:!TYPES.includes(r.Bereich),renameable:r.Bereich==='Sonstiges'||!TYPES.includes(r.Bereich),title:String(r.Titel),time:hm(r.Uhrzeit),note:String(r.Notiz),loc:String(r.Ort||''),files:keep[id]||[]});ne++});
 sh('Tage').forEach(r=>{const t=S.trips.find(x=>x.id===String(r.ReiseID));if(t&&r.Name){t.dn=t.dn||{};t.dn[ds(r.Datum)]=String(r.Name)}});
 save();render();toast(`Import: ${nt} neue Reise(n), ${ne} Einträge`)}
 function moveDay(t,from,to){t.dn=t.dn||{};const ds=days(t),a=ds.map(d=>({e:t.days[d]||[],n:t.dn[d]||'',o:open.has(d)})),x=a.splice(from,1)[0];a.splice(to,0,x);
@@ -326,7 +326,7 @@ $.addEventListener('click',e=>{const el=e.target.closest('[data-fa]');if(!el)ret
 let openN=new Set();
 function notesView(t){t.notes=t.notes||[];t.gfiles=t.gfiles||[];
 return `<div class="pad"><div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn" data-na="add" style="flex:1;margin:0">+ Neue Notiz</button><label class="btn" style="flex:1;margin:0;text-align:center">📎 Anhang<input type="file" multiple data-na="file" hidden></label></div>`+
-t.notes.map(n=>{const o=openN.has(n.id);return `<div class="card nt"><div class="h" data-na="tog" data-id="${n.id}" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:13px 14px;font-weight:700"><div style="flex:1"><b>${esc(n.title)||'Ohne Titel'}</b></div><span class="n" style="font-size:13px;font-weight:400">${o?'▲':'▼'}</span></div>${o?`<div class="b"><label>Titel</label><input data-nf="title" data-id="${n.id}" placeholder="Titel" value="${esc(n.title)}"><label>Notiz</label><textarea data-nf="text" data-id="${n.id}" placeholder="Notiz …" style="min-height:120px;width:100%">${esc(n.text)}</textarea><button class="btn g" data-na="del" data-id="${n.id}" style="margin:10px 0 0;color:#c0392b;font-size:14px">🗑 Löschen</button></div>`:''}</div>`}).join('')+
+t.notes.map(n=>{const o=openN.has(n.id);return `<div class="card nt"><div class="h" data-na="tog" data-id="${n.id}" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:13px 14px;font-weight:700"><div style="flex:1"><b>${esc(n.title)||'Ohne Titel'}</b>${n.loc?' <span>📍</span>':''}</div><span class="n" style="font-size:13px;font-weight:400">${o?'▲':'▼'}</span></div>${o?`<div class="b"><label>Titel</label><input data-nf="title" data-id="${n.id}" placeholder="Titel" value="${esc(n.title)}"><label>Notiz</label><textarea data-nf="text" data-id="${n.id}" placeholder="Notiz …" style="min-height:120px;width:100%">${esc(n.text)}</textarea><label>Ort</label><input data-nf="loc" data-id="${n.id}" placeholder="📍 Ort / Adresse (für die Karte)" value="${esc(n.loc)}"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${n.loc?`<button class="btn g" data-mp="goN" data-id="${n.id}" style="margin:0;font-size:14px">🗺️ Karte</button>`:''}<button class="btn g" data-na="del" data-id="${n.id}" style="margin:0;color:#c0392b;font-size:14px">🗑 Löschen</button></div></div>`:''}</div>`}).join('')+
 (t.notes.length?'':'<p class="empty" style="margin:30px 0;font-size:16px">Noch keine Notizen.</p>')+
 (t.gfiles.length?`<h2 style="margin:18px 0 8px">Allgemeine Anhänge</h2>`+t.gfiles.map((f,i)=>fileRow(f,'n','',i)).join(''):'')+`</div>`}
 const _nt=()=>S.trips.find(x=>x.id===cur);
@@ -462,7 +462,7 @@ async function attach(f){let d=await shrink(f),n=f.name;if(/^data:image\/jpeg/.t
 /* ===== Tippen neben ein Fenster schließt es ===== */
 $.addEventListener('click',e=>{const o=e.target,k=o.dataset&&o.dataset.bd;if(!k)return;if(k==='ed')ed=false;else if(k==='cf')cf=null;else if(k==='ps')ps=false;else if(k==='adding')adding=false;else if(k==='stg')stg=false;else return;render()});
 /* ===== Tab-Wechsel mit Schiebe-Animation ===== */
-const TAB_ORDER=['days','notes','calendar','files'];let tabBusy=false;
+const TAB_ORDER=['days','notes','calendar','map','files'];let tabBusy=false;
 function slideTab(t,nt){const cur0=(t.tab==='timeline'?'days':t.tab)||'days';if(nt===cur0||tabBusy)return;
  const dir=TAB_ORDER.indexOf(nt)>TAB_ORDER.indexOf(cur0)?1:-1,el=document.querySelector('.tabbody'),done=()=>{t.tab=nt;save();render()};
  if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches){done();return}
@@ -472,9 +472,9 @@ function slideTab(t,nt){const cur0=(t.tab==='timeline'?'days':t.tab)||'days';if(
   e2.style.transition='transform .05s ease,opacity .05s ease';e2.style.transform='translateX(0)';e2.style.opacity='1';
   setTimeout(()=>{e2.style.transition=e2.style.transform=e2.style.opacity=''},80)},50)}
 /* ===== Wischen zwischen den Reise-Tabs (Tage, Notizen, Kalender, Anhänge) ===== */
-(function(){const ORDER=['days','notes','calendar','files'];let sx=0,sy=0,st=0,ok=false;
+(function(){const ORDER=['days','notes','calendar','map','files'];let sx=0,sy=0,st=0,ok=false;
  const hs=el=>{for(;el&&el!==document.body;el=el.parentElement){const c=getComputedStyle(el);if(/(auto|scroll)/.test(c.overflowX)&&el.scrollWidth>el.clientWidth+2)return true}return false};
- addEventListener('touchstart',e=>{ok=false;if(e.touches.length!==1||!cur||pv||window._lb||dg)return;const x=e.touches[0].clientX,tg=e.target;if(x<24||x>innerWidth-24)return;if(!tg.closest||tg.closest('input,textarea,select,[contenteditable],.ov,.lb')||hs(tg))return;sx=x;sy=e.touches[0].clientY;st=Date.now();ok=true},{passive:true});
+ addEventListener('touchstart',e=>{ok=false;if(e.touches.length!==1||!cur||pv||window._lb||dg)return;const x=e.touches[0].clientX,tg=e.target;if(x<24||x>innerWidth-24)return;if(!tg.closest||tg.closest('input,textarea,select,[contenteditable],.ov,.lb,.mapbox')||hs(tg))return;sx=x;sy=e.touches[0].clientY;st=Date.now();ok=true},{passive:true});
  addEventListener('touchmove',()=>{if(dg)ok=false},{passive:true});
  addEventListener('touchend',e=>{if(!ok)return;ok=false;const c=e.changedTouches[0],dx=c.clientX-sx,dy=c.clientY-sy;
   if(dg||window._lb||Date.now()-st>700||Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*2||String(getSelection()))return;
@@ -553,5 +553,152 @@ function openLb(items,start){closeLb(true);if(!items.length)return;let idx=start
   else if(t==='del')confirmDlg('Anhang „'+it.f.name+'“ löschen?',()=>{const k=it.list?it.list.indexOf(it.f):-1;if(k>=0)it.list.splice(k,1);items.splice(idx,1);save();render();if(!items.length)closeLb(false);else{idx=Math.min(idx,items.length-1);show()}})};
  document.addEventListener('keydown',function k(e){if(!window._lb){document.removeEventListener('keydown',k);return}if(e.key==='Escape')closeLb(false);else if(e.key==='ArrowLeft')go(-1);else if(e.key==='ArrowRight')go(1)});
  show();document.body.append(o);window._lb=o}
+</script>
+<script>
+/* ===== Karte: Orte aus Einträgen + Notizen, Pins, automatischer Zoom ===== */
+/* Optional: eigenen Google-Maps-Schlüssel hier eintragen, dann nutzen alle Geräte die Google-Karte.
+   Ohne Schlüssel (hier und in den Einstellungen) wird OpenStreetMap verwendet. */
+const GMAPS_KEY_DEFAULT='';
+const gKey=()=>(LS.get('gmaps_key')||GMAPS_KEY_DEFAULT||'').trim();
+const gmapsUrl=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+let mapTok=0,mapSt=null,mapFocus=null,gBroken=false;
+const geoFail=new Set();
+(function(){const st=document.createElement('style');st.textContent=
+'.tabs{gap:4px}.tabs button{padding:8px 2px;font-size:13px;min-width:0}'+
+'.mapbox{position:relative;height:58vh;min-height:320px;border-radius:14px;overflow:hidden;border:1px solid var(--bd);background:var(--card);touch-action:none}#mapel{position:absolute;inset:0}'+
+'.pin{width:34px;height:34px;border-radius:50%;background:var(--ac,#c8b4f0);border:2px solid #fff;box-shadow:0 3px 9px rgba(40,30,80,.4);display:grid;place-items:center;font-size:17px;line-height:1}'+
+'.mapnote{font-size:13px;color:var(--mut);margin:10px 2px}.mapbar{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}.mapbar button{font-size:14px}'+
+'.mrow{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;cursor:pointer}.mrow .mi{font-size:20px}.mrow .mt{flex:1;min-width:0}.mrow .mt b,.mrow .mt small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mrow .mt small{color:var(--mut);font-size:12px}.mrow .ms{font-size:15px}.mrow .mg{color:var(--ac2);text-decoration:none;font-size:20px;padding:4px 8px}'+
+'.leaflet-container{font:inherit}.leaflet-popup-content{font-size:14px;line-height:1.35;color:#3d3350}.leaflet-popup-content a{color:#7d52c4}.mpi{margin:0 0 8px}.mpi:last-child{margin:0}.mpi small{color:#6d6480}';
+document.head.append(st)})();
+
+/* --- Geocoding: Google (mit Schlüssel) sonst OpenStreetMap/Nominatim; Ergebnis wird am Eintrag gespeichert --- */
+async function geocode(q){
+ const m=/^\s*(-?\d{1,2}(?:\.\d+)?)\s*[,;]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/.exec(q);
+ if(m){const la=+m[1],ln=+m[2];if(Math.abs(la)<=90&&Math.abs(ln)<=180)return{lat:la,lng:ln}}
+ if(gKey()&&!gBroken){try{const j=await (await fetch('https://maps.googleapis.com/maps/api/geocode/json?language=de&key='+encodeURIComponent(gKey())+'&address='+encodeURIComponent(q))).json();
+  if(j.status==='OK'&&j.results[0]){const l=j.results[0].geometry.location;return{lat:l.lat,lng:l.lng}}
+  if(j.status==='ZERO_RESULTS')return null}catch(e){}}
+ try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=de&q='+encodeURIComponent(q));
+  if(r.ok){const j=await r.json();return j[0]?{lat:+j[0].lat,lng:+j[0].lon}:null}}catch(e){}
+ const r2=await fetch('https://photon.komoot.io/api/?limit=1&lang=de&q='+encodeURIComponent(q));if(!r2.ok)throw new Error('geo '+r2.status);
+ const f=((await r2.json()).features||[])[0];return f?{lat:f.geometry.coordinates[1],lng:f.geometry.coordinates[0]}:null}
+let gqP=Promise.resolve();
+function geoQ(q){const run=gqP.catch(()=>{}).then(()=>geocode(q));const wait=()=>new Promise(r=>setTimeout(r,gKey()&&!gBroken?150:1100));gqP=run.then(wait,wait);return run}
+/* Erst genau so suchen; wenn nichts gefunden wird, mit dem Reiseziel ergänzen (z. B. "Sagrada Familia" + "Barcelona") */
+async function geoFor(q,t){let r=await geoQ(q);if(!r&&t&&t.dest&&!q.toLowerCase().includes(String(t.dest).toLowerCase()))r=await geoQ(q+', '+t.dest);return r}
+const geoOk=ref=>{const q=String(ref.loc||'').trim();return !!(ref.geo&&ref.geo.q===q&&isFinite(ref.geo.lat)&&isFinite(ref.geo.lng))};
+
+function collectPlaces(t){const ds=days(t),out=[];
+ Object.keys(t.days).sort().forEach(d=>(t.days[d]||[]).forEach(e=>{const q=String(e.loc||'').trim();if(!q)return;const i=ds.indexOf(d);
+  out.push({id:e.id,ref:e,loc:q,icon:ICON[e.type]||'📌',title:(e.type||'Eintrag')+(e.title?': '+e.title:''),sub:(i>=0?'Tag '+(i+1)+' · ':'')+fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})+(e.time?' · '+e.time:''),ord:d+(e.time||'99:99')})}));
+ (t.notes||[]).forEach(n=>{const q=String(n.loc||'').trim();if(!q)return;out.push({id:n.id,ref:n,loc:q,icon:'📝',title:n.title||'Notiz',sub:'Notiz',ord:'9999'})});
+ return out.sort((a,b)=>a.ord<b.ord?-1:a.ord>b.ord?1:0)}
+
+/* --- Kartenanbieter --- */
+const LF={
+ load(){if(window.L)return Promise.resolve();return LF.p||(LF.p=new Promise((res,rej)=>{const c=document.createElement('link');c.rel='stylesheet';c.href='lib/leaflet.css';document.head.append(c);const s=document.createElement('script');s.src='lib/leaflet.js';s.onload=()=>res();s.onerror=()=>{LF.p=null;rej(new Error('leaflet'))};document.head.append(s)}))},
+ async create(el){LF.map=L.map(el,{worldCopyJump:true}).setView([25,10],2);L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,referrerPolicy:'origin',attribution:'© OpenStreetMap-Mitwirkende © CARTO'}).addTo(LF.map);LF.lg=L.layerGroup().addTo(LF.map);setTimeout(()=>{try{LF.map&&LF.map.invalidateSize()}catch(e){}},250)},
+ clear(){LF.lg&&LF.lg.clearLayers()},
+ add(g){g.m=L.marker([g.lat,g.lng],{icon:L.divIcon({className:'',html:'<div class="pin">'+g.icon+'</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-17]})}).bindPopup(g.html,{maxWidth:260}).addTo(LF.lg)},
+ fit(pts){const m=LF.map;if(!m)return;if(!pts.length)m.fitWorld();else if(pts.length===1)m.setView([pts[0].lat,pts[0].lng],14);else m.fitBounds(L.latLngBounds(pts.map(p=>[p.lat,p.lng])),{padding:[44,44],maxZoom:15})},
+ focus(g){LF.map.setView([g.lat,g.lng],Math.max(LF.map.getZoom(),14));g.m.openPopup()},
+ destroy(){try{LF.map&&LF.map.remove()}catch(e){}LF.map=null}};
+const GM={
+ load(){if(GM.p)return GM.p;return GM.p=new Promise((res,rej)=>{window.gm_authFailure=()=>{gBroken=true;toast('Google-Maps-Schlüssel abgelehnt – nutze OpenStreetMap');render()};window.__gmInit=()=>res();
+  const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(gKey())+'&loading=async&callback=__gmInit&language=de&v=weekly';s.onerror=()=>{GM.p=null;rej(new Error('gm'))};document.head.append(s);setTimeout(()=>rej(new Error('timeout')),12000)})},
+ async create(el){const{Map,InfoWindow}=await google.maps.importLibrary('maps');await google.maps.importLibrary('marker');
+  GM.map=new Map(el,{center:{lat:25,lng:10},zoom:2,mapId:'DEMO_MAP_ID',streetViewControl:false,mapTypeControl:false,fullscreenControl:false});GM.iw=new InfoWindow();GM.ms=[]},
+ clear(){(GM.ms||[]).forEach(m=>{m.map=null});GM.ms=[]},
+ add(g){const c=document.createElement('div');c.className='pin';c.textContent=g.icon;const m=new google.maps.marker.AdvancedMarkerElement({map:GM.map,position:{lat:g.lat,lng:g.lng},content:c});m.addListener('click',()=>GM.open(g));g.m=m;GM.ms.push(m)},
+ open(g){GM.iw.setContent('<div style="color:#3d3350;font-size:14px;line-height:1.35">'+g.html+'</div>');GM.iw.open({map:GM.map,anchor:g.m})},
+ fit(pts){const m=GM.map;if(!m)return;if(!pts.length){m.setCenter({lat:25,lng:10});m.setZoom(2);return}if(pts.length===1){m.setCenter(pts[0]);m.setZoom(14);return}
+  const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend(p));m.fitBounds(b,48);google.maps.event.addListenerOnce(m,'idle',()=>{if(m.getZoom()>15)m.setZoom(15)})},
+ focus(g){GM.map.panTo({lat:g.lat,lng:g.lng});if(GM.map.getZoom()<14)GM.map.setZoom(14);GM.open(g)},
+ destroy(){GM.map=null;GM.ms=[]}};
+const MPA=()=>gKey()&&!gBroken?GM:LF;
+
+/* --- Tab "Karte" --- */
+function mapView(t){return `<div class="pad"><div class="mapbox"><div id="mapel"></div></div><div class="mapnote" id="mapmsg"></div><div class="mapbar" id="mapbar"></div><div id="maplist"></div></div>`}
+const setMsg=m=>{const e=document.getElementById('mapmsg');if(e)e.textContent=m||''};
+function groupsOf(){const M={};mapSt.places.filter(p=>geoOk(p.ref)).forEach(p=>{const k=p.ref.geo.lat.toFixed(4)+','+p.ref.geo.lng.toFixed(4);(M[k]=M[k]||{lat:p.ref.geo.lat,lng:p.ref.geo.lng,items:[]}).items.push(p)});
+ return Object.values(M).map(g=>{g.icon=g.items[0].icon;g.html=g.items.map(p=>`<div class="mpi"><b>${p.icon} ${esc(p.title)}</b><br><small>${esc(p.sub)}</small><br>${esc(p.loc)}<br><a href="${gmapsUrl(p.loc)}" target="_blank" rel="noopener">↗ In Google Maps öffnen</a></div>`).join('');return g})}
+function paint(fit){if(!mapSt)return;const A=mapSt.A;if(!A.map)return;A.clear();mapSt.groups=groupsOf();mapSt.groups.forEach(g=>A.add(g));if(fit)A.fit(mapSt.groups.map(g=>({lat:g.lat,lng:g.lng})));listUpd()}
+function listUpd(){const L=document.getElementById('maplist'),B=document.getElementById('mapbar');if(!L||!mapSt)return;
+ const bad=mapSt.places.filter(p=>!geoOk(p.ref)&&geoFail.has(p.loc)).length;
+ L.innerHTML=mapSt.places.map((p,i)=>{const ok=geoOk(p.ref),st=ok?'':geoFail.has(p.loc)?'⚠️':'⏳';
+  return `<div class="mrow" data-mp="focus" data-i="${i}"><span class="mi">${p.icon}</span><div class="mt"><b>${esc(p.title)}</b><small>${esc(p.sub)}</small><small>📍 ${esc(p.loc)}</small></div><span class="ms" title="${ok?'':geoFail.has(p.loc)?'Ort nicht gefunden':'Wird gesucht …'}">${st}</span><a class="mg" href="${gmapsUrl(p.loc)}" target="_blank" rel="noopener" aria-label="In Google Maps öffnen">↗</a></div>`}).join('');
+ if(B)B.innerHTML=mapSt.groups.length>1?'<button class="g" data-mp="fit">🔍 Alle Pins zeigen</button>':'';
+ if(B&&bad)B.innerHTML+='<button class="g" data-mp="retry">↻ Nicht gefundene erneut suchen</button>'}
+function mapDestroy(){mapTok++;if(mapSt){try{mapSt.A.destroy()}catch(e){}}mapSt=null}
+async function mapBoot(){
+ const el=document.getElementById('mapel');if(!el)return;const t=S.trips.find(x=>x.id===cur);if(!t||t.tab!=='map')return;
+ const tok=++mapTok,A=MPA();mapSt={t,A,places:collectPlaces(t),groups:[]};listUpd();
+ if(!mapSt.places.length)setMsg('Noch keine Orte. Trage bei Einträgen oder Notizen unter „Ort“ eine Adresse oder einen Ortsnamen ein.');
+ try{await A.load();if(tok!==mapTok)return;await A.create(el)}
+ catch(e){if(tok!==mapTok)return;if(A===GM){gBroken=true;toast('Google Maps konnte nicht geladen werden – nutze OpenStreetMap');render();return}setMsg('Karte konnte nicht geladen werden (Internetverbindung nötig).');return}
+ if(tok!==mapTok)return;
+ paint(true);
+ if(mapFocus){const f=mapFocus;mapFocus=null;const g=mapSt.groups.find(g=>g.items.some(p=>p.id===f));if(g)A.focus(g)}
+ const need=mapSt.places.filter(p=>!geoOk(p.ref)&&!geoFail.has(p.loc));
+ if(!need.length){if(mapSt.places.length&&!navigator.onLine)setMsg('Offline – Karten-Kacheln können fehlen.');else if(mapSt.places.length)setMsg(mapSt.groups.reduce((n,g)=>n+g.items.length,0)+' Ort(e) auf der Karte.');return}
+ if(!navigator.onLine){setMsg('Offline – neue Orte werden gesucht, sobald du wieder online bist.');return}
+ let n=0,added=false;
+ for(const p of need){if(tok!==mapTok)return;n++;setMsg('Orte werden gesucht … ('+n+'/'+need.length+')');
+  if(geoOk(p.ref))continue;
+  const twin=mapSt.places.find(x=>x!==p&&x.loc===p.loc&&geoOk(x.ref));
+  try{const r=twin?twin.ref.geo:await geoFor(p.loc,t);if(tok!==mapTok)return;
+   if(r){p.ref.geo={q:p.loc,lat:r.lat,lng:r.lng};added=true;save();paint(true)}else{geoFail.add(p.loc);listUpd()}}
+  catch(e){if(tok!==mapTok)return;setMsg('Orte konnten gerade nicht gesucht werden (Verbindung?).');listUpd();return}}
+ if(tok!==mapTok)return;const f=mapSt.places.filter(p=>geoFail.has(p.loc)&&!geoOk(p.ref)).length;
+ setMsg(mapSt.groups.reduce((c,g)=>c+g.items.length,0)+' Ort(e) auf der Karte.'+(f?' '+f+' nicht gefunden (⚠️) – bitte Schreibweise prüfen.':''))}
+
+/* --- Klicks: Karte-Buttons, Liste --- */
+$.addEventListener('click',e=>{const el=e.target.closest('[data-mp]');if(!el||e.target.closest('a'))return;const a=el.dataset.mp,t=S.trips.find(x=>x.id===cur);if(!t)return;
+ if(a==='goE'||a==='goN'){mapFocus=el.dataset.id;t.tab='map';save();scrollTo(0,0);render()}
+ else if(a==='fit'){if(mapSt)mapSt.A.fit(mapSt.groups.map(g=>({lat:g.lat,lng:g.lng})))}
+ else if(a==='retry'){geoFail.clear();render()}
+ else if(a==='focus'&&mapSt){const p=mapSt.places[+el.dataset.i];if(!p)return;
+  if(!geoOk(p.ref))return toast(geoFail.has(p.loc)?'Ort nicht gefunden – bitte Schreibweise prüfen':'Ort wird noch gesucht …');
+  const g=mapSt.groups.find(g=>g.items.includes(p));if(g){const b=document.querySelector('.mapbox');b&&b.scrollIntoView({behavior:'smooth',block:'center'});mapSt.A.focus(g)}}});
+
+/* --- Ort-Feld geändert: sofort suchen und am Eintrag speichern --- */
+$.addEventListener('change',async e=>{const el=e.target;if(el.dataset.f!=='loc'&&el.dataset.nf!=='loc')return;
+ const t=S.trips.find(x=>x.id===cur);if(!t)return;
+ const ref=el.dataset.f?findE(el.closest('[data-e]').dataset.e)[2]:(t.notes||[]).find(n=>n.id===el.dataset.id);if(!ref)return;
+ const q=String(ref.loc||'').trim();if(!q){delete ref.geo;save();return}if(geoOk(ref))return;
+ if(!navigator.onLine)return toast('Ort gespeichert – wird auf der Karte gesucht, sobald du online bist.');
+ try{const r=await geoFor(q,t);if(String(ref.loc||'').trim()!==q)return;
+  if(r){ref.geo={q,lat:r.lat,lng:r.lng};geoFail.delete(q);save();toast('📍 Ort gefunden')}else{geoFail.add(q);toast('Ort nicht gefunden – bitte genauer eingeben')}}
+ catch(err){toast('Ort gespeichert – Suche gerade nicht möglich')}});
+
+
+/* --- Adress-Vorschläge beim Tippen (Google Places mit Schlüssel, sonst Photon/OpenStreetMap) --- */
+(function(){const st=document.createElement('style');st.textContent='.ac{border:1px solid var(--bd);background:var(--card);border-radius:10px;margin-top:4px;overflow:hidden}.ac div{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bd)}.ac div:last-child{border:0}.ac small{display:block;color:var(--mut);font-size:12px}';document.head.append(st)})();
+let acTok=0,acT=null;const acClear=()=>document.querySelectorAll('.ac').forEach(x=>x.remove());
+async function suggest(q){
+ if(gKey()&&!gBroken){try{const r=await fetch('https://places.googleapis.com/v1/places:autocomplete',{method:'POST',headers:{'Content-Type':'application/json','X-Goog-Api-Key':gKey()},body:JSON.stringify({input:q,languageCode:'de'})});
+  if(r.ok){const L=((await r.json()).suggestions||[]).filter(x=>x.placePrediction).map(x=>{const pp=x.placePrediction,sf=pp.structuredFormat;return{main:sf?sf.mainText.text:pp.text.text,sub:sf&&sf.secondaryText?sf.secondaryText.text:'',text:pp.text.text}});if(L.length)return L}}catch(e){}}
+ const r=await fetch('https://photon.komoot.io/api/?limit=5&lang=de&q='+encodeURIComponent(q));if(!r.ok)throw new Error('photon');const seen=new Set(),out=[];
+ ((await r.json()).features||[]).forEach(f=>{const p=f.properties||{},c=f.geometry.coordinates,street=[p.street,p.housenumber].filter(Boolean).join(' '),city=[p.postcode,p.city||p.town||p.village||p.county||p.state].filter(Boolean).join(' ');
+  const parts=[p.name,street,city,p.country].filter((x,i,a)=>x&&a.indexOf(x)===i),text=parts.join(', ');if(!text||seen.has(text))return;seen.add(text);
+  out.push({main:parts[0],sub:parts.slice(1).join(', '),text,lat:c[1],lng:c[0]})});return out}
+function acRef(el){const t=S.trips.find(x=>x.id===cur);if(!t)return null;return el.dataset.f?findE(el.closest('[data-e]').dataset.e)[2]:(t.notes||[]).find(n=>n.id===el.dataset.id)}
+function acPick(el,s){const ref=acRef(el);if(!ref)return;ref.loc=s.text;el.value=s.text;acClear();const q=s.text.trim();
+ if(s.lat!=null){ref.geo={q,lat:s.lat,lng:s.lng};geoFail.delete(q);save();toast('📍 Ort übernommen')}else{delete ref.geo;save();el.dispatchEvent(new Event('change',{bubbles:true}))}
+ el.blur()}
+$.addEventListener('input',e=>{const el=e.target;if(el.dataset.f!=='loc'&&el.dataset.nf!=='loc')return;clearTimeout(acT);acClear();const q=el.value.trim();if(q.length<3||!navigator.onLine)return;const tk=++acTok;
+ acT=setTimeout(async()=>{try{const L=await suggest(q);if(tk!==acTok||document.activeElement!==el||!L.length)return;acClear();
+  const box=document.createElement('div');box.className='ac';box.innerHTML=L.map((s,i)=>`<div data-i="${i}">${esc(s.main)}${s.sub?`<small>${esc(s.sub)}</small>`:''}</div>`).join('');
+  box.addEventListener('pointerdown',ev=>ev.preventDefault());box.addEventListener('click',ev=>{const d=ev.target.closest('[data-i]');if(d)acPick(el,L[+d.dataset.i])});el.after(box)}catch(err){}},350)});
+$.addEventListener('focusout',e=>{if(e.target.dataset&&(e.target.dataset.f==='loc'||e.target.dataset.nf==='loc')){acTok++;acClear()}});
+
+/* --- Einstellungen: Google-Maps-Schlüssel --- */
+document.addEventListener('input',e=>{if(e.target.dataset&&e.target.dataset.gk){LS.set('gmaps_key',e.target.value.trim());gBroken=false;GM.p=null}});
+
+/* --- render erweitern: Karte nach jedem Neuaufbau starten --- */
+const _r2=render;
+render=function(){mapDestroy();_r2();mapBoot()};
+
 </script>
 </body></html>

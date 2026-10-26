@@ -1,5 +1,5 @@
 /* World Planner offline shell. Bump CACHE_VERSION after each deployment. */
-const CACHE_VERSION = 'world-planner-v5';
+const CACHE_VERSION = 'world-planner-v6';
 const SHELL = [
   './',
   './index.html',
@@ -7,7 +7,9 @@ const SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-192-maskable.png',
-  './icons/icon-512-maskable.png'
+  './icons/icon-512-maskable.png',
+  './lib/leaflet.js',
+  './lib/leaflet.css'
 ];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
