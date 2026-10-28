@@ -703,10 +703,10 @@ render=function(){mapDestroy();_r2();mapBoot()};
 '.wxd{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:14px;color:var(--tx)}'+
 '.wxl{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--bd);font-size:14px}.wxl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wxl small{color:var(--mut)}.wxl button{flex:none;font-size:13px;padding:5px 10px}'+
 '.wxp{margin-top:8px}.wxch{display:flex;flex-wrap:wrap;gap:6px}.wxch button{font-size:13px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wxch button.on{background:var(--ac);color:var(--onac);border-color:var(--ac)}'+
-'.wxman{display:flex;gap:6px;margin-top:8px}.wxman input{flex:1;min-width:0}';
+'.wxman{display:flex;gap:6px;margin-top:8px}.wxman input{flex:1;min-width:0}.wxc .wh{cursor:pointer;-webkit-tap-highlight-color:transparent}.wxc .wh>b{min-width:0}.wxs{display:flex;align-items:baseline;gap:8px;flex:none;white-space:nowrap}.wxs b{font-size:15px}.wxs .wxlo{font-size:15px}.wxs .chv{color:var(--mut);font-size:13px}';
 document.head.append(st)})();
 const WXC={};try{Object.assign(WXC,JSON.parse(LS.get('wx_cache')||'{}'))}catch(e){}
-const wxOpen=new Set();let wxTok=0,wxSt={loading:false,err:false};
+const wxOpen=new Set(),wxCol=new Set();let wxTok=0,wxSt={loading:false,err:false};
 const wxPersist=()=>{const lim=Date.now()-5*864e5,ks=Object.keys(WXC);ks.forEach(k=>{if(WXC[k].ts<lim)delete WXC[k]});const r=Object.keys(WXC);if(r.length>900)r.slice(0,r.length-900).forEach(k=>delete WXC[k]);LS.set('wx_cache',JSON.stringify(WXC))};
 const wxKey=(la,ln)=>(+la).toFixed(2)+','+(+ln).toFixed(2);
 const wxAdd=(d,n)=>{const x=new Date(d+'T00:00');return iso(new Date(x.getFullYear(),x.getMonth(),x.getDate()+n))};
@@ -742,8 +742,10 @@ function wxCard(t,d,i){const p=wxPick(t,d),dat=p.lat!=null?WXC[wxKey(p.lat,p.lng
   main=`<div class="wxm"><span class="wxi">${w[0]}</span><div><b>${Math.round(dat.tmax)}° <span class="wxlo">/ ${Math.round(dat.tmin)}°</span></b><small>${w[1]}${dat.k==='cl'?' · Ø der letzten Jahre':''}</small></div></div><div class="wxd"><span>💧 ${f1(dat.pr)} mm${dat.pp!=null?' · '+dat.pp+' %':''}</span><span>💨 ${dat.wind==null?'–':Math.round(dat.wind)} km/h</span></div>`}
  else main=`<div class="wxm"><small>${p.lat==null?(p.src==='entry'&&geoFail.has(p.name)?'Ort nicht gefunden – bitte anderen Ort wählen.':'Ort wird gesucht …'):wxSt.loading?'Wetter wird geladen …':navigator.onLine?'Keine Daten für diesen Tag.':'Offline – noch keine gespeicherten Werte.'}</small></div>`;
  const tag=p.src==='man'?'eigener Ort':p.src==='dest'?'Reiseziel':'aus Eintrag';
+ const col=wxCol.has(t.id+'|'+d),hd=`<div class="wh" data-wx="col" data-d="${d}"><b>${d===today?'<span class="wt">Heute</span> · ':''}Tag ${i+1} · ${fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})}${dn?' · '+esc(dn):''}</b><span class="wxs">${col&&dat?`<b>${Math.round(dat.tmax)}° <span class="wxlo">/ ${Math.round(dat.tmin)}°</span></b>`:''}<span class="chv">${col?'▼':'▲'}</span></span></div>`;
+ if(col)return `<div class="card wxc${d===today?' today-card':''}">${hd}</div>`;
  let panel='';if(op){const E=esc;panel=`<div class="wxp"><div class="wxch">${p.cands.map(c=>`<button class="${p.src==='entry'&&p.key===c.key?'on':''}" data-wx="sel" data-d="${d}" data-k="${E(c.key)}">📍 ${E(c.name)}</button>`).join('')}<button class="${p.src==='dest'?'on':''}" data-wx="sel" data-d="${d}" data-k="dest">🌍 ${E(t.dest)}</button></div><div class="wxman"><input data-wxin data-d="${d}" placeholder="Eigenen Ort eingeben …" value="${p.src==='man'?E(p.name):''}"><button data-wx="man" data-d="${d}">OK</button></div>${p.src==='man'?`<button class="g" style="margin-top:8px;font-size:13px" data-wx="rst" data-d="${d}">↺ Zurücksetzen</button>`:''}</div>`}
- return `<div class="card wxc${d===today?' today-card':''}"><div class="wh"><b>${d===today?'<span class="wt">Heute</span> · ':''}Tag ${i+1} · ${fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})}${dn?' · '+esc(dn):''}</b></div>${main}<div class="wxl"><span>📍 ${esc(p.name)} <small>· ${tag}${p.cands.length>1&&p.src==='entry'?' · '+p.cands.length+' Orte':''}</small></span><button class="g" data-wx="open" data-d="${d}">${op?'Fertig':'Ort ändern'}</button></div>${panel}</div>`}
+ return `<div class="card wxc${d===today?' today-card':''}">${hd}${main}<div class="wxl"><span>📍 ${esc(p.name)} <small>· ${tag}${p.cands.length>1&&p.src==='entry'?' · '+p.cands.length+' Orte':''}</small></span><button class="g" data-wx="open" data-d="${d}">${op?'Fertig':'Ort ändern'}</button></div>${panel}</div>`}
 function weatherView(t){t.wx=t.wx||{};t.wxSel=t.wxSel||{};
  return `<div class="pad">${days(t).map((d,i)=>wxCard(t,d,i)).join('')}</div>`}
 function wxPaint(t){if(!t||cur!==t.id||t.tab!=='weather')return;const b=document.querySelector('.tabbody');if(!b)return;const ae=document.activeElement;if(ae&&ae.hasAttribute&&ae.hasAttribute('data-wxin'))return;b.innerHTML=weatherView(t)}
@@ -763,6 +765,7 @@ async function wxBoot(){const t=S.trips.find(x=>x.id===cur);if(!t||t.tab!=='weat
   await wxFetchAll(t,tok)}catch(e){wxSt.loading=false;wxPaint(t)}}
 $.addEventListener('click',async e=>{const el=e.target.closest('[data-wx]');if(!el)return;const t=S.trips.find(x=>x.id===cur);if(!t)return;const a=el.dataset.wx,d=el.dataset.d;t.wx=t.wx||{};t.wxSel=t.wxSel||{};
  if(a==='open'){wxOpen.has(d)?wxOpen.delete(d):wxOpen.add(d);wxPaint(t)}
+ else if(a==='col'){const k=t.id+'|'+d;wxCol.has(k)?wxCol.delete(k):wxCol.add(k);wxPaint(t)}
  else if(a==='sel'){delete t.wx[d];t.wxSel[d]=el.dataset.k;save();wxPaint(t);wxBoot()}
  else if(a==='rst'){delete t.wx[d];delete t.wxSel[d];save();wxPaint(t);wxBoot()}
  else if(a==='man'){const inp=$.querySelector(`[data-wxin][data-d="${d}"]`),q=inp?inp.value.trim():'';if(!q)return;if(!navigator.onLine)return toast('Offline – Ort kann gerade nicht gesucht werden');
@@ -851,8 +854,35 @@ async function pdfBuild(t,mode,withNotes,withFiles){
  const ns=withNotes?(t.notes||[]).filter(n=>n.title||n.text||n.loc):[];
  if(ns.length){curDay=null;y+=GAP;ensure(100*u);card(TL('📝  Notizen',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,0.6),strip:C.ac});curDay='Notizen';
   ns.forEach(n=>{const ls=[];if(n.title)ls.push(...TL(n.title,fs+2,1,C.tx,mw(true)));if(n.loc)ls.push(...TL('📍 '+n.loc,fs-1,0,C.ac2,mw(true),{sp:2}));if(n.text)ls.push(...TL(n.text,fs-1,0,soft,mw(true),{sp:3}));card(ls,{strip:'#e9a3bd'})})}
- const gf=withFiles?(t.gfiles||[]).map(f=>f.name):[];
- if(gf.length){curDay=null;y+=GAP;ensure(100*u);card(TL('📎  Allgemeine Anhänge',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,.6),strip:C.ac});curDay='Anhänge';card(TL(gf.join(', '),fs-1,0,soft,mw(true)),{strip:'#c3c0cf'})}
+ /* ---- Anhänge (Bilder direkt, PDFs seitenweise als Bild) ---- */
+ const AT=[];if(withFiles){ds.forEach((d,i)=>(t.days[d]||[]).forEach(e=>(e.files||[]).forEach(f=>AT.push({f,ctx:'Tag '+(i+1)+' · '+fmt(d,{day:'2-digit',month:'2-digit'})+' · '+(e.title||e.type||'Eintrag')}))));(t.gfiles||[]).forEach(f=>AT.push({f,ctx:'Allgemeine Anhänge'}))}
+ if(AT.length){
+  const dataBytes=u=>{const b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a};
+  const isPdfF=f=>/^data:application\/pdf/i.test(f.data||'')||/\.pdf$/i.test(f.name||'');
+  const isImgF=f=>/^data:image\/(?!heic|heif)/i.test(f.data||'');
+  function pic(src,sw,sh,cap){const capL=cap?TL(cap,fs-2,1,C.mut,CWd):[],ch=lh(capL)+3*u,full=limit()-M-26*u-ch-GAP;
+   let w=Math.min(CWd,sw*2),h=w*sh/sw;
+   if(y>M+1&&Math.min(h,full)>limit()-y-ch-GAP&&limit()-y-ch-GAP<.6*full)newPage();
+   const maxH=y>M+1?Math.min(full,limit()-y-ch-GAP):full;
+   if(h>maxH){h=maxH;w=h*sw/sh}
+   let ty=y;capL.forEach(l=>{ty+=l.h;cx.font=l.f;cx.fillStyle=l.c;cx.textAlign='left';cx.fillText(l.t,M,ty-l.h*.27)});y=ty+3*u;
+   const x=M+(CWd-w)/2;cx.fillStyle='#ffffff';cx.fillRect(x,y,w,h);cx.drawImage(src,x,y,w,h);cx.lineWidth=u;cx.strokeStyle=C.bd;cx.strokeRect(x,y,w,h);y+=h+GAP*1.5}
+  let pj=null;const loadPdfJs=async()=>{if(!pj){pj=await import('./lib/pdf.min.mjs');pj.GlobalWorkerOptions.workerSrc=new URL('./lib/pdf.worker.min.mjs',location.href).href}return pj};
+  const skipped=[],MAXP=25;let started=false;
+  const head=()=>{if(started)return;started=true;curDay=null;newPage();card(TL('📎  Anhänge',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,.6),strip:C.ac});curDay='Anhänge'};
+  for(const {f,ctx} of AT){
+   try{
+    if(isImgF(f)){const im=await pdfImg(f.data);if(!im||!im.width)throw 0;head();pic(im,im.width,im.height,ctx+' – '+f.name)}
+    else if(isPdfF(f)){const lib=await loadPdfJs(),doc=await lib.getDocument({data:dataBytes(f.data)}).promise,n=Math.min(doc.numPages,MAXP);
+     for(let p=1;p<=n;p++){const pg=await doc.getPage(p),v0=pg.getViewport({scale:1}),sc=Math.min(CWd/v0.width,2400/Math.max(v0.width,v0.height)),vp=pg.getViewport({scale:sc}),c2=document.createElement('canvas');c2.width=Math.max(1,Math.round(vp.width));c2.height=Math.max(1,Math.round(vp.height));
+      const c2x=c2.getContext('2d');c2x.fillStyle='#fff';c2x.fillRect(0,0,c2.width,c2.height);await pg.render({canvasContext:c2x,viewport:vp,canvas:c2}).promise;head();
+      pic(c2,c2.width,c2.height,ctx+' – '+f.name+(doc.numPages>1?' (Seite '+p+'/'+doc.numPages+')':''));c2.width=c2.height=0;pg.cleanup()}
+     if(doc.numPages>n){ensure(40*u);card(TL('… '+(doc.numPages-n)+' weitere Seiten von '+f.name+' nicht dargestellt.',fs-1,0,C.mut,mw(false)),{nb:1})}
+     doc.destroy()}
+    else skipped.push(f.name)
+   }catch(err){console.error('Anhang',f.name,err);skipped.push(f.name)}}
+  if(skipped.length){head();ensure(60*u);card(TL('Nicht darstellbar (nur Name): '+skipped.join(', '),fs-1,0,C.mut,mw(false)),{nb:1})}
+ }
  flush();
  return pdfWrite(pages,A4?595.28:270,A4?841.89:Math.round(270*H/W*100)/100)}
 
