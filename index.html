@@ -3,7 +3,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#c8b4f0"><meta name="application-name" content="World Planner"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="World Planner">
  <link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"><script src="https://accounts.google.com/gsi/client" async></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f7f2fc;--card:#fff;--cardA:rgba(255,255,255,.86);--tx:#3d3350;--mut:#8c82a3;--bd:#e8ddf5;--ac:#c8b4f0;--ac2:#7d52c4;--onac:#34284d;--bgimg:linear-gradient(160deg,#f8effa 0%,#f1ecfb 50%,#f6f0fa 100%)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -127,7 +126,7 @@ function extra(t){let h='';const sh=(b,bd)=>h+=`<div class="ov dim"${bd?` data-b
 if(stg){const cu=window._themeId||'flieder',sw=d=>THEMES.filter(x=>!!x.dark===d).map(x=>`<div class="swi"><button class="sw${x.id===cu?' on':''}" data-a="theme" data-id="${x.id}" title="${x.name}" aria-label="${x.name}" style="background:linear-gradient(135deg,${x.bg} 50%,${x.ac} 50%)"></button><small>${x.name}</small></div>`).join('');
  sh(`<b>Einstellungen</b><label>Konto</label><button class="g" data-pg="auth" style="width:100%;text-align:left">${authLabel()}</button><label>Farben</label><div class="stg-h">Hell</div><div class="swg">${sw(false)}</div><div class="stg-h">Dunkel</div><div class="swg">${sw(true)}</div><label>Karte</label><input data-gk="1" placeholder="Google-Maps-API-Schlüssel (optional)" value="${esc(LS.get('gmaps_key')||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="stg-h">Ohne Schlüssel wird OpenStreetMap als Karte genutzt. Mit Schlüssel (Maps JavaScript API + Geocoding API) die Google-Karte.</div><label>Karten-Kacheln (optional, nur OpenStreetMap-Karte)</label><input data-tk="1" placeholder="Eigene Kachel-URL, leer = Standard" value="${esc(LS.get('tile_url')||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="stg-h">Nur nötig, falls die Standardkarte nicht lädt. Beispiel CARTO mit kostenlosem Schlüssel: https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=DEIN_SCHLÜSSEL</div><label>Sprache</label><select aria-label="Sprache"><option>Deutsch</option></select><div class="stg-h">Weitere Sprachen folgen später.</div><button class="g" data-a="stgx" style="margin-top:12px;width:100%">Schließen</button>`,'stg')}
 if(pm&&t){h+=`<div class="ov dim" data-a="pmx"><div class="card add sheet"><b>Hinzufügen</b><div class="pmenu">${TYPES.map(k=>`<button data-a="addE" data-d="${pm}" data-k="${k}">${ICON[k]||'📌'} ${k}</button>`).join('')}</div></div></div>`}
-if(om&&t)h+=`<div class="ov dim option-backdrop" data-a="optx"><div class="card add sheet"><b>Optionen</b><div class="pmenu"><button data-a="edT">✏️ Umbenennen &amp; Datum ändern</button><button data-a="exp">⬇ Als Excel exportieren</button><button data-a="files">📎 Anhänge</button><button data-a="del">🗑 Reise löschen</button></div></div></div>`;
+if(om&&t)h+=`<div class="ov dim option-backdrop" data-a="optx"><div class="card add sheet"><b>Optionen</b><div class="pmenu"><button data-a="edT">✏️ Umbenennen &amp; Datum ändern</button><button data-a="pdf">📄 Als PDF teilen / speichern</button><button data-a="files">📎 Anhänge</button><button data-a="del">🗑 Reise löschen</button></div></div></div>`;
 if(ed&&t)sh(`<b>Reise bearbeiten</b><div><label>Reiseziel</label><input id="ed_d" value="${esc(t.dest)}"></div><div><label>Von</label><input id="ed_f" type="date" value="${t.from}"></div><div><label>Bis</label><input id="ed_t" type="date" value="${t.to}"></div><label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px"><input id="ed_m" type="checkbox" checked style="width:auto"> Einträge mit neuem Startdatum verschieben</label><div style="display:flex;gap:8px"><button data-a="saveT">Speichern</button><button class="g" data-a="edx">Abbrechen</button></div>`,'ed');
 if(cf)sh(`<b>${esc(cf.msg)}</b><div style="display:flex;gap:8px"><button data-a="cfy">${esc(cf.lbl||'Löschen')}</button><button class="g" data-a="cfn">Abbrechen</button></div>`,'cf');
 if(h)$.insertAdjacentHTML('beforeend',h);}
@@ -137,7 +136,7 @@ function listView(){
 const all=[...S.trips].sort((a,b)=>b.from.localeCompare(a.from)),fo=focus(),active=all.filter(t=>t.to>=today),past=all.filter(t=>t.to<today);
 const next=all.filter(t=>t.from>today).sort((a,b)=>a.from.localeCompare(b.from))[0];
 const card=t=>{const big=t.id===fo,n=Math.round((new Date(t.from+'T00:00')-new Date(today+'T00:00'))/864e5),isPast=t.to<today;const st=t.from<=today&&today<=t.to?'Jetzt auf Reise':t.from>today?(big?'Als Nächstes · ':'')+(n===1?'morgen':'in '+n+' Tagen'):'';return `<div class="tc${big?' big':''}${isPast?' past past-compact':''}${t.img?'':' noimg'}" data-a="go" data-id="${t.id}" style="background:${bgOf(t)}">${st?`<span class="tag">${st}</span>`:''}<h3>${esc(t.dest)}</h3><p>${fmt(t.from)} – ${fmt(t.to)} · ${days(t).length} Tage</p></div>`};
-$.innerHTML=`<div class="top">${next?`<p style="color:var(--mut);margin:4px 0 0">Nächste Reise: <b>${esc(next.dest)}</b> · ${Math.max(0,Math.round((new Date(next.from)-new Date(today))/864e5))} Tage</p>`:''}</div><div class="list">${active.map(card).join('')}${past.length?`<h2>Vergangene Reisen</h2>${past.map(card).join('')}`:''}${!all.length?'<p class="empty">Noch keine Reise.<br>Tippe unten rechts auf +</p>':''}</div>${menu?'<div class="ov" data-a="menu"></div>':''}<div class="fabw">${menu?`<div class="menu"><button data-a="new">+ Neue Reise</button><label class="btn">⬆ Excel-Import<input type="file" accept=".xlsx,.xls" data-a="imp" hidden></label><button data-a="settings">⚙️ Einstellungen</button></div>`:''}<button class="fab" data-a="menu" aria-label="Menü">${menu?'✕':'+'}</button></div>${adding?`<div class="ov dim" data-bd="adding"><div class="card add sheet"><b>Neue Reise</b><div><label>Reiseziel</label><input id="nd"></div><div><label>Von</label><input id="nf" type="date"></div><div><label>Bis</label><input id="nt" type="date"></div><div style="display:flex;gap:8px"><button data-a="create">Anlegen</button><button class="g" data-a="cancel">Abbrechen</button></div></div></div>`:''}`;
+$.innerHTML=`<div class="top">${next?`<p style="color:var(--mut);margin:4px 0 0">Nächste Reise: <b>${esc(next.dest)}</b> · ${Math.max(0,Math.round((new Date(next.from)-new Date(today))/864e5))} Tage</p>`:''}</div><div class="list">${active.map(card).join('')}${past.length?`<h2>Vergangene Reisen</h2>${past.map(card).join('')}`:''}${!all.length?'<p class="empty">Noch keine Reise.<br>Tippe unten rechts auf +</p>':''}</div>${menu?'<div class="ov" data-a="menu"></div>':''}<div class="fabw">${menu?`<div class="menu"><button data-a="new">+ Neue Reise</button><button data-a="settings">⚙️ Einstellungen</button></div>`:''}<button class="fab" data-a="menu" aria-label="Menü">${menu?'✕':'+'}</button></div>${adding?`<div class="ov dim" data-bd="adding"><div class="card add sheet"><b>Neue Reise</b><div><label>Reiseziel</label><input id="nd"></div><div><label>Von</label><input id="nf" type="date"></div><div><label>Bis</label><input id="nt" type="date"></div><div style="display:flex;gap:8px"><button data-a="create">Anlegen</button><button class="g" data-a="cancel">Abbrechen</button></div></div></div>`:''}`;
 if(sc){sc=false;const f=$.querySelector('.tc.big');f&&requestAnimationFrame(()=>f.scrollIntoView({block:'center'}))}}
 function tripView(t){t.dn=t.dn||{};const tab=(t.tab==='timeline'?'days':t.tab)||'days';
 const ds=days(t);
@@ -145,8 +144,8 @@ const summary=ds.flatMap(d=>t.days[d]||[]).length;
 let body='';
 if(tab==='days') body=`<div class="pad">${ds.map((d,i)=>{const es=t.days[d]||[],o=open.has(d),isToday=d===today;return `<div class="card day${isToday?' today-card':''}" data-d="${d}"><div class="h" data-a="tog" data-d="${d}"><div style="flex:1">${isToday?'<span class="today-label">Heute</span><br>':''}<b class="dnm">${i+1}</b> • ${fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})}${t.dn[d]?` • <b>${esc(t.dn[d])}</b>`:''}</div><span class="n">${es.map(x=>ICON[x.type]||'📌').join(' ')} ${o?'▲':'▼'}</span></div>${o?`<div class="b"><label>Name des Tages</label><input data-f="dn" data-d="${d}" placeholder="Tag ${i+1}" value="${esc(t.dn[d]||'')}">${es.map(entry).join('')}<button class="g plus" data-a="addm" data-d="${d}">+ Hinzufügen</button></div>`:''}</div>`}).join('')}</div>`;
 if(tab==='calendar') body=calendarView(t);
-if(tab==='files') body=filesView(t);if(tab==='notes') body=notesView(t);if(tab==='map') body=mapView(t);
-$.innerHTML=`<div class="hero${t.img?'':' noimg'}" style="background:${bgOf(t)}"><div class="r0"><button class="av" data-a="pic">${t.img?`<img src="${t.img}">`:esc((t.dest||'?')[0])}<span class="cam">+</span></button><div><h1>${esc(t.dest)}</h1><p>${fmt(t.from)} – ${fmt(t.to)} · ${ds.length} Tage · ${summary} Einträge</p></div></div><div class="row"><button class="g" data-a="back">← Reisen</button><button class="g" data-a="opt" aria-label="Optionen">⋯</button></div></div><div class="tabs"><button class="${tab==='days'?'active':''}" data-a="tab" data-tab="days" aria-label="Tage"><span class="ti">🧳</span>${tab==='days'?' Tage':''}</button><button class="${tab==='notes'?'active':''}" data-a="tab" data-tab="notes" aria-label="Notizen"><span class="ti">📝</span>${tab==='notes'?' Notizen':''}</button><button class="${tab==='calendar'?'active':''}" data-a="tab" data-tab="calendar" aria-label="Kalender"><span class="ti">📅</span>${tab==='calendar'?' Kalender':''}</button><button class="${tab==='map'?'active':''}" data-a="tab" data-tab="map" aria-label="Karte"><span class="ti">🗺️</span>${tab==='map'?' Karte':''}</button><button class="${tab==='files'?'active':''}" data-a="tab" data-tab="files" aria-label="Anhänge"><span class="ti">📎</span>${tab==='files'?' Anhänge':''}</button></div>${ps?`<div class="ov dim" data-bd="ps"><div class="card add sheet"><b>Reisebild</b><label class="btn" style="margin:0;text-align:center;color:#fff">📷 Bild aus Galerie<input type="file" accept="image/*" data-a="img" hidden></label><div class="img-search"><input id="imgq" placeholder="Bild suchen …" value="${esc(t.dest)}"><button data-a="imgSearch">Suchen</button></div><div id="imgres" class="img-results"></div><small style="color:var(--mut)">Bilder werden direkt aus Wikimedia Commons geladen – antippen zum Auswählen.</small>${t.img?'<button class="g" data-a="rmimg">Bild entfernen</button>':''}<button class="g" data-a="picx">Abbrechen</button></div></div>`:''}<div class="tabbody">${body}</div>`;
+if(tab==='files') body=filesView(t);if(tab==='notes') body=notesView(t);if(tab==='map') body=mapView(t);if(tab==='weather') body=weatherView(t);
+$.innerHTML=`<div class="hero${t.img?'':' noimg'}" style="background:${bgOf(t)}"><div class="r0"><button class="av" data-a="pic">${t.img?`<img src="${t.img}">`:esc((t.dest||'?')[0])}<span class="cam">+</span></button><div><h1>${esc(t.dest)}</h1><p>${fmt(t.from)} – ${fmt(t.to)} · ${ds.length} Tage · ${summary} Einträge</p></div></div><div class="row"><button class="g" data-a="back">← Reisen</button><button class="g" data-a="opt" aria-label="Optionen">⋯</button></div></div><div class="tabs"><button class="${tab==='days'?'active':''}" data-a="tab" data-tab="days" aria-label="Tage"><span class="ti">🧳</span>${tab==='days'?' Tage':''}</button><button class="${tab==='notes'?'active':''}" data-a="tab" data-tab="notes" aria-label="Notizen"><span class="ti">📝</span>${tab==='notes'?' Notizen':''}</button><button class="${tab==='calendar'?'active':''}" data-a="tab" data-tab="calendar" aria-label="Kalender"><span class="ti">📅</span>${tab==='calendar'?' Kalender':''}</button><button class="${tab==='map'?'active':''}" data-a="tab" data-tab="map" aria-label="Karte"><span class="ti">🗺️</span>${tab==='map'?' Karte':''}</button><button class="${tab==='weather'?'active':''}" data-a="tab" data-tab="weather" aria-label="Wetter"><span class="ti">⛅</span>${tab==='weather'?' Wetter':''}</button><button class="${tab==='files'?'active':''}" data-a="tab" data-tab="files" aria-label="Anhänge"><span class="ti">📎</span>${tab==='files'?' Anhänge':''}</button></div>${ps?`<div class="ov dim" data-bd="ps"><div class="card add sheet"><b>Reisebild</b><label class="btn" style="margin:0;text-align:center;color:#fff">📷 Bild aus Galerie<input type="file" accept="image/*" data-a="img" hidden></label><div class="img-search"><input id="imgq" placeholder="Bild suchen …" value="${esc(t.dest)}"><button data-a="imgSearch">Suchen</button></div><div id="imgres" class="img-results"></div><small style="color:var(--mut)">Bilder werden direkt aus Wikimedia Commons geladen – antippen zum Auswählen.</small>${t.img?'<button class="g" data-a="rmimg">Bild entfernen</button>':''}<button class="g" data-a="picx">Abbrechen</button></div></div>`:''}<div class="tabbody">${body}</div>`;
 if(ps)setTimeout(()=>searchImages(t.dest),0);
 }
 let calSel=null;
@@ -229,7 +228,7 @@ else if(a==='pic'){ps=true}else if(a==='picx'){ps=false}
 else if(a==='rmimg'){t.img=null;ps=false;save()}
 else if(a==='files'){om=false;t.tab='files';save()}
 else if(a==='saveCal'){const found=findE(el.dataset.id);if(found.length){const[ct,cd,ce]=found,upd=!!ce.calendarEventId,nm=[ce.type||'Eigener Eintrag',String(ce.title||'').trim()].filter(Boolean).join(' – ');ask('Eintrag „'+nm+'“ vom '+fmt(cd)+(upd?' im Google Kalender aktualisieren?':' in deinen Google Kalender exportieren?'),()=>{saveCalendarEvent(ct,cd,ce)},upd?'Aktualisieren':'Exportieren')}else toast('Eintrag wurde nicht gefunden')} else if(a==='delE'){const[tt,d,en]=findE(el.dataset.id);ask('Eintrag „'+(en.type||'Eigener Eintrag')+'“ löschen?',()=>{tt.days[d]=tt.days[d].filter(x=>x!==en)})}
-else if(a==='exp'){om=false;menu=false;render();return exportX(t?[t]:S.trips)}
+else if(a==='pdf'){om=false;menu=false;render();return pdfDlg(t)}
 else return;
 render()});
 $.addEventListener('input',e=>{const el=e.target,f=el.dataset.f;if(!f)return;
@@ -237,29 +236,12 @@ if(f==='dn'){const t=S.trips.find(x=>x.id===cur);t.dn=t.dn||{};t.dn[el.dataset.d
 const[,,en]=findE(el.closest('[data-e]').dataset.e);if(!en)return;en[f]=el.value;if(f==='type')el.closest('.e').querySelector('.tn').textContent=(ICON[el.value]||'📌')+' '+(el.value||'Eigener Eintrag');save()});
 $.addEventListener('change',async e=>{const el=e.target,a=el.dataset.a;
 if(a==='img'&&el.files[0]){const t=S.trips.find(x=>x.id===cur),d=await resize(el.files[0]);if(d){t.img=d;ps=false;save();render()}else toast('Bild nicht lesbar')}
-else if(a==='file'){const[,,en]=findE(el.dataset.id);for(const f of el.files)en.files.push(await attach(f));save();render()}
-else if(a==='imp'&&el.files[0])importX(el.files[0]).catch(()=>toast('Import fehlgeschlagen'))});
+else if(a==='file'){const[,,en]=findE(el.dataset.id);for(const f of el.files)en.files.push(await attach(f));save();render()}});
 async function saveBlob(name,data,mime){try{if(typeof claude!=='undefined'&&claude.use){const dl=await claude.use('downloads');if(dl){await dl.save({filename:name,data});return true}}}catch(e){if(e&&e.code==='declined')return false}
 const file=new File([data],name,{type:mime||'application/octet-stream'});
 try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});return true}}catch(e){if(e&&e.name==='AbortError')return false}
 const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return true}
 async function saveF(f){try{const b=atob(f.data.split(',')[1]),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);const mime=(f.data.match(/^data:([^;,]+)/)||[])[1];if(await saveBlob(f.name,u,mime))toast('Gespeichert')}catch(e){toast('Speichern fehlgeschlagen')}}
-async function exportX(L){
-if(typeof XLSX==='undefined')return toast('Excel-Bibliothek nicht geladen (Internet nötig)');
-const R=[],E=[];L.forEach(t=>{R.push({ID:t.id,Ziel:t.dest,Von:t.from,Bis:t.to});Object.keys(t.days).sort().forEach(d=>t.days[d].forEach(e=>E.push({ReiseID:t.id,Reise:t.dest,Datum:d,Bereich:e.type,Titel:e.title,Uhrzeit:e.time,Notiz:e.note,Ort:e.loc||'',Anhänge:(e.files||[]).map(f=>f.name).join(', '),ID:e.id})))});
-const D=[];L.forEach(t=>Object.entries(t.dn||{}).forEach(([d,n])=>n&&D.push({ReiseID:t.id,Datum:d,Name:n})));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(R,{header:['ID','Ziel','Von','Bis']}),'Reisen');
-XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(E,{header:['ReiseID','Reise','Datum','Bereich','Titel','Uhrzeit','Notiz','Ort','Anhänge','ID']}),'Einträge');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D,{header:['ReiseID','Datum','Name']}),'Tage');
-const data=new Uint8Array(XLSX.write(wb,{type:'array',bookType:'xlsx'}));
-const name='Urlaub_'+(L.length===1?L[0].dest.replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_'):'Alle')+'.xlsx';try{if(await saveBlob(name,data,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'))toast('Export gespeichert')}catch(e){toast('Export fehlgeschlagen')}}
-const hm=v=>v instanceof Date?String(v.getHours()).padStart(2,'0')+':'+String(v.getMinutes()).padStart(2,'0'):typeof v==='number'?String(Math.floor(v*24)%24).padStart(2,'0')+':'+String(Math.round(v*1440)%60).padStart(2,'0'):String(v);
-const ds=v=>v instanceof Date?iso(v):typeof v==='number'?new Date(Math.round((v-25569)*864e5)).toISOString().slice(0,10):String(v||'').trim();
-async function importX(file){menu=false;
-const wb=XLSX.read(await file.arrayBuffer(),{cellDates:true});const sh=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{raw:true,defval:''}):[];
-let nt=0,ne=0;sh('Reisen').forEach(r=>{const id=String(r.ID||uid()),from=ds(r.Von),to=ds(r.Bis);if(!r.Ziel||!from||!to)return;let t=S.trips.find(x=>x.id===id);if(!t){t={id,days:{}};S.trips.push(t);nt++}Object.assign(t,{dest:String(r.Ziel),from,to})});
-const keep={};S.trips.forEach(t=>Object.values(t.days).flat().forEach(e=>keep[e.id]=e.files));
-const touched=new Set();sh('Einträge').forEach(r=>{const t=S.trips.find(x=>x.id===String(r.ReiseID));if(!t)return;if(!touched.has(t.id)){touched.add(t.id);t.days={}}const d=ds(r.Datum),id=String(r.ID||uid());(t.days[d]=t.days[d]||[]).push({id,type:String(r.Bereich),custom:!TYPES.includes(r.Bereich),renameable:r.Bereich==='Sonstiges'||!TYPES.includes(r.Bereich),title:String(r.Titel),time:hm(r.Uhrzeit),note:String(r.Notiz),loc:String(r.Ort||''),files:keep[id]||[]});ne++});
-sh('Tage').forEach(r=>{const t=S.trips.find(x=>x.id===String(r.ReiseID));if(t&&r.Name){t.dn=t.dn||{};t.dn[ds(r.Datum)]=String(r.Name)}});
-save();render();toast(`Import: ${nt} neue Reise(n), ${ne} Einträge`)}
 function moveDay(t,from,to){t.dn=t.dn||{};const ds=days(t),a=ds.map(d=>({e:t.days[d]||[],n:t.dn[d]||'',o:open.has(d)})),x=a.splice(from,1)[0];a.splice(to,0,x);
 const nd={},ndn={},no=new Set();Object.keys(t.days).forEach(k=>{if(!ds.includes(k))nd[k]=t.days[k]});Object.keys(t.dn).forEach(k=>{if(!ds.includes(k))ndn[k]=t.dn[k]});
 ds.forEach((d,i)=>{if(a[i].e.length)nd[d]=a[i].e;if(a[i].n)ndn[d]=a[i].n;if(a[i].o)no.add(d)});t.days=nd;t.dn=ndn;open=no}
@@ -462,7 +444,7 @@ async function attach(f){let d=await shrink(f),n=f.name;if(/^data:image\/jpeg/.t
 /* ===== Tippen neben ein Fenster schließt es ===== */
 $.addEventListener('click',e=>{const o=e.target,k=o.dataset&&o.dataset.bd;if(!k)return;if(k==='ed')ed=false;else if(k==='cf')cf=null;else if(k==='ps')ps=false;else if(k==='adding')adding=false;else if(k==='stg')stg=false;else return;render()});
 /* ===== Tab-Wechsel mit Schiebe-Animation ===== */
-const TAB_ORDER=['days','notes','calendar','map','files'];let tabBusy=false;
+const TAB_ORDER=['days','notes','calendar','map','weather','files'];let tabBusy=false;
 function slideTab(t,nt){const cur0=(t.tab==='timeline'?'days':t.tab)||'days';if(nt===cur0||tabBusy)return;
  const dir=TAB_ORDER.indexOf(nt)>TAB_ORDER.indexOf(cur0)?1:-1,el=document.querySelector('.tabbody'),done=()=>{t.tab=nt;save();render()};
  if(!el||matchMedia('(prefers-reduced-motion: reduce)').matches){done();return}
@@ -472,7 +454,7 @@ function slideTab(t,nt){const cur0=(t.tab==='timeline'?'days':t.tab)||'days';if(
   e2.style.transition='transform .05s ease,opacity .05s ease';e2.style.transform='translateX(0)';e2.style.opacity='1';
   setTimeout(()=>{e2.style.transition=e2.style.transform=e2.style.opacity=''},80)},50)}
 /* ===== Wischen zwischen den Reise-Tabs (Tage, Notizen, Kalender, Anhänge) ===== */
-(function(){const ORDER=['days','notes','calendar','map','files'];let sx=0,sy=0,st=0,ok=false;
+(function(){const ORDER=['days','notes','calendar','map','weather','files'];let sx=0,sy=0,st=0,ok=false;
  const hs=el=>{for(;el&&el!==document.body;el=el.parentElement){const c=getComputedStyle(el);if(/(auto|scroll)/.test(c.overflowX)&&el.scrollWidth>el.clientWidth+2)return true}return false};
  addEventListener('touchstart',e=>{ok=false;if(e.touches.length!==1||!cur||pv||window._lb||dg)return;const x=e.touches[0].clientX,tg=e.target;if(x<24||x>innerWidth-24)return;if(!tg.closest||tg.closest('input,textarea,select,[contenteditable],.ov,.lb,.mapbox')||hs(tg))return;sx=x;sy=e.touches[0].clientY;st=Date.now();ok=true},{passive:true});
  addEventListener('touchmove',()=>{if(dg)ok=false},{passive:true});
@@ -570,6 +552,7 @@ const geoFail=new Set();
 '.mapnote{font-size:13px;color:var(--mut);margin:10px 2px}.mapbar{display:flex;gap:8px;margin:10px 0 4px;flex-wrap:wrap}.mapbar button{font-size:14px}'+
 '.mrow{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-top:8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;cursor:pointer}.mrow .mi{font-size:20px}.mrow .mt{flex:1;min-width:0}.mrow .mt b,.mrow .mt small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mrow .mt small{color:var(--mut);font-size:12px}.mrow .ms{font-size:15px}.mrow .mg{color:var(--ac2);text-decoration:none;font-size:20px;padding:4px 8px}'+
 '.leaflet-container{font:inherit}.leaflet-popup-content{font-size:14px;line-height:1.35;color:#3d3350}.leaflet-popup-content a{color:#7d52c4}.mpi{margin:0 0 8px}.mpi:last-child{margin:0}.mpi small{color:#6d6480}';
+st.textContent+='.pin{width:34px;font-weight:700;font-size:15px;color:#fff;white-space:nowrap;background:var(--ac2)}.pin i{font-size:10px;font-style:normal;margin-left:1px;opacity:.95}.mapchips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.mapchips::-webkit-scrollbar{display:none}.mapchips:empty{display:none}.mchip{flex:none;display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--card);color:var(--mut);white-space:nowrap}.mchip i{width:10px;height:10px;border-radius:50%;background:var(--c);opacity:.4}.mchip.on{border-color:var(--c);color:var(--tx);background:color-mix(in srgb,var(--c) 16%,var(--card))}.mchip.on i{opacity:1}.mchip.all{background:transparent;color:var(--ac2)}.mnum{flex:none;min-width:30px;height:30px;border-radius:15px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px}';
 document.head.append(st)})();
 
 /* --- Geocoding: Google (mit Schlüssel) sonst OpenStreetMap/Nominatim; Ergebnis wird am Eintrag gespeichert --- */
@@ -589,18 +572,25 @@ function geoQ(q){const run=gqP.catch(()=>{}).then(()=>geocode(q));const wait=()=
 async function geoFor(q,t){let r=await geoQ(q);if(!r&&t&&t.dest&&!q.toLowerCase().includes(String(t.dest).toLowerCase()))r=await geoQ(q+', '+t.dest);return r}
 const geoOk=ref=>{const q=String(ref.loc||'').trim();return !!(ref.geo&&ref.geo.q===q&&isFinite(ref.geo.lat)&&isFinite(ref.geo.lng))};
 
-function collectPlaces(t){const ds=days(t),out=[];
- Object.keys(t.days).sort().forEach(d=>(t.days[d]||[]).forEach(e=>{const q=String(e.loc||'').trim();if(!q)return;const i=ds.indexOf(d);
-  out.push({id:e.id,ref:e,loc:q,icon:ICON[e.type]||'📌',title:(e.type||'Eintrag')+(e.title?': '+e.title:''),sub:(i>=0?'Tag '+(i+1)+' · ':'')+fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})+(e.time?' · '+e.time:''),ord:d+(e.time||'99:99')})}));
- (t.notes||[]).forEach(n=>{const q=String(n.loc||'').trim();if(!q)return;out.push({id:n.id,ref:n,loc:q,icon:'📝',title:n.title||'Notiz',sub:'Notiz',ord:'9999'})});
- return out.sort((a,b)=>a.ord<b.ord?-1:a.ord>b.ord?1:0)}
+const DAYCOL=['#7d6bd6','#e0668f','#2f9e7a','#e08a2e','#2f86d0','#b8569c','#4aa3a0','#c9743d'];
+const dayCol=p=>p.dk==='notes'?'#8c82a3':DAYCOL[Math.max(0,p.di)%DAYCOL.length];
+function collectPlaces(t){const ds=days(t),out=[],cnt={};
+ Object.keys(t.days).sort().forEach(d=>(t.days[d]||[]).forEach(e=>{const q=String(e.loc||'').trim();if(!q)return;const i=ds.indexOf(d);cnt[d]=(cnt[d]||0)+1;
+  out.push({id:e.id,ref:e,loc:q,dk:d,di:i,num:cnt[d],icon:ICON[e.type]||'📌',title:(e.type||'Eintrag')+(e.title?': '+e.title:''),sub:(i>=0?'Tag '+(i+1)+' · ':'')+fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})+(e.time?' · '+e.time:'')})}));
+ (t.notes||[]).forEach((n,k)=>{const q=String(n.loc||'').trim();if(!q)return;out.push({id:n.id,ref:n,loc:q,dk:'notes',di:-1,num:k+1,icon:'📝',title:n.title||'Notiz',sub:'Notiz'})});
+ return out}
+function mapChips(t,places){const hid=new Set(t.mapHide||[]),g=[],seen={};places.forEach(p=>{if(!seen[p.dk]){seen[p.dk]={p,n:0};g.push(seen[p.dk])}seen[p.dk].n++});
+ if(g.length<2)return'';const allOn=g.every(x=>!hid.has(x.p.dk));
+ return '<button class="mchip all" data-mp="tgall">'+(allOn?'Alle aus':'Alle an')+'</button>'+g.map(x=>{const p=x.p,on=!hid.has(p.dk);
+  return `<button class="mchip${on?' on':''}" data-mp="tgd" data-d="${p.dk}" style="--c:${dayCol(p)}"><i></i>${p.dk==='notes'?'📝 Notizen':(p.di>=0?'Tag '+(p.di+1)+' · ':'')+fmt(p.dk,{day:'2-digit',month:'2-digit'})} (${x.n})</button>`}).join('')}
+function mapChipsUpd(){const el=document.getElementById('mapchips');if(el&&mapSt)el.innerHTML=mapChips(mapSt.t,mapSt.places)}
 
 /* --- Kartenanbieter --- */
 const LF={
  load(){if(window.L)return Promise.resolve();return LF.p||(LF.p=new Promise((res,rej)=>{const c=document.createElement('link');c.rel='stylesheet';c.href='lib/leaflet.css';document.head.append(c);const s=document.createElement('script');s.src='lib/leaflet.js';s.onload=()=>res();s.onerror=()=>{LF.p=null;rej(new Error('leaflet'))};document.head.append(s)}))},
  async create(el){LF.map=L.map(el,{worldCopyJump:true}).setView([25,10],2);L.tileLayer(LS.get('tile_url')||'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{subdomains:'abcd',maxZoom:18,referrerPolicy:'origin',attribution:LS.get('tile_url')?'Kartendaten © OpenStreetMap-Mitwirkende':'Kacheln © Esri, HERE, Garmin, OpenStreetMap-Mitwirkende'}).addTo(LF.map);LF.lg=L.layerGroup().addTo(LF.map);setTimeout(()=>{try{LF.map&&LF.map.invalidateSize()}catch(e){}},250)},
  clear(){LF.lg&&LF.lg.clearLayers()},
- add(g){g.m=L.marker([g.lat,g.lng],{icon:L.divIcon({className:'',html:'<div class="pin">'+g.icon+'</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-17]})}).bindPopup(g.html,{maxWidth:260}).addTo(LF.lg)},
+ add(g){g.m=L.marker([g.lat,g.lng],{icon:L.divIcon({className:'',html:'<div class="pin" style="background:'+g.color+'">'+g.lab+'</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-17]})}).bindPopup(g.html,{maxWidth:260}).addTo(LF.lg)},
  fit(pts){const m=LF.map;if(!m)return;if(!pts.length)m.fitWorld();else if(pts.length===1)m.setView([pts[0].lat,pts[0].lng],14);else m.fitBounds(L.latLngBounds(pts.map(p=>[p.lat,p.lng])),{padding:[44,44],maxZoom:15})},
  focus(g){LF.map.setView([g.lat,g.lng],Math.max(LF.map.getZoom(),14));g.m.openPopup()},
  destroy(){try{LF.map&&LF.map.remove()}catch(e){}LF.map=null}};
@@ -610,7 +600,7 @@ const GM={
  async create(el){const{Map,InfoWindow}=await google.maps.importLibrary('maps');await google.maps.importLibrary('marker');
   GM.map=new Map(el,{center:{lat:25,lng:10},zoom:2,mapId:'DEMO_MAP_ID',streetViewControl:false,mapTypeControl:false,fullscreenControl:false});GM.iw=new InfoWindow();GM.ms=[]},
  clear(){(GM.ms||[]).forEach(m=>{m.map=null});GM.ms=[]},
- add(g){const c=document.createElement('div');c.className='pin';c.textContent=g.icon;const m=new google.maps.marker.AdvancedMarkerElement({map:GM.map,position:{lat:g.lat,lng:g.lng},content:c});m.addListener('click',()=>GM.open(g));g.m=m;GM.ms.push(m)},
+ add(g){const c=document.createElement('div');c.className='pin';c.innerHTML=g.lab;c.style.background=g.color;const m=new google.maps.marker.AdvancedMarkerElement({map:GM.map,position:{lat:g.lat,lng:g.lng},content:c});m.addListener('click',()=>GM.open(g));g.m=m;GM.ms.push(m)},
  open(g){GM.iw.setContent('<div style="color:#3d3350;font-size:14px;line-height:1.35">'+g.html+'</div>');GM.iw.open({map:GM.map,anchor:g.m})},
  fit(pts){const m=GM.map;if(!m)return;if(!pts.length){m.setCenter({lat:25,lng:10});m.setZoom(2);return}if(pts.length===1){m.setCenter(pts[0]);m.setZoom(14);return}
   const b=new google.maps.LatLngBounds();pts.forEach(p=>b.extend(p));m.fitBounds(b,48);google.maps.event.addListenerOnce(m,'idle',()=>{if(m.getZoom()>15)m.setZoom(15)})},
@@ -619,15 +609,16 @@ const GM={
 const MPA=()=>gKey()&&!gBroken?GM:LF;
 
 /* --- Tab "Karte" --- */
-function mapView(t){return `<div class="pad"><div class="mapbox"><div id="mapel"></div></div><div class="mapnote" id="mapmsg"></div><div class="mapbar" id="mapbar"></div><div id="maplist"></div></div>`}
+function mapView(t){return `<div class="pad"><div class="mapchips" id="mapchips">${mapChips(t,collectPlaces(t))}</div><div class="mapbox"><div id="mapel"></div></div><div class="mapnote" id="mapmsg"></div><div class="mapbar" id="mapbar"></div><div id="maplist"></div></div>`}
 const setMsg=m=>{const e=document.getElementById('mapmsg');if(e)e.textContent=m||''};
-function groupsOf(){const M={};mapSt.places.filter(p=>geoOk(p.ref)).forEach(p=>{const k=p.ref.geo.lat.toFixed(4)+','+p.ref.geo.lng.toFixed(4);(M[k]=M[k]||{lat:p.ref.geo.lat,lng:p.ref.geo.lng,items:[]}).items.push(p)});
- return Object.values(M).map(g=>{g.icon=g.items[0].icon;g.html=g.items.map(p=>`<div class="mpi"><b>${p.icon} ${esc(p.title)}</b><br><small>${esc(p.sub)}</small><br>${esc(p.loc)}<br><a href="${gmapsUrl(p.loc)}" target="_blank" rel="noopener">↗ In Google Maps öffnen</a></div>`).join('');return g})}
+function groupsOf(){const hid=new Set((mapSt.t.mapHide)||[]),M={};mapSt.places.filter(p=>geoOk(p.ref)&&!hid.has(p.dk)).forEach(p=>{const k=p.ref.geo.lat.toFixed(4)+','+p.ref.geo.lng.toFixed(4);(M[k]=M[k]||{lat:p.ref.geo.lat,lng:p.ref.geo.lng,items:[]}).items.push(p)});
+ return Object.values(M).map(g=>{const p0=g.items[0];g.icon=p0.icon;g.color=dayCol(p0);g.lab=(p0.dk==='notes'?'📝':p0.num)+(g.items.length>1?'<i>+'+(g.items.length-1)+'</i>':'');
+  g.html=g.items.map(p=>`<div class="mpi"><b>${p.dk==='notes'?'':p.num+'. '}${p.icon} ${esc(p.title)}</b><br><small>${esc(p.sub)}</small><br>${esc(p.loc)}<br><a href="${gmapsUrl(p.loc)}" target="_blank" rel="noopener">↗ In Google Maps öffnen</a></div>`).join('');return g})}
 function paint(fit){if(!mapSt)return;const A=mapSt.A;if(!A.map)return;A.clear();mapSt.groups=groupsOf();mapSt.groups.forEach(g=>A.add(g));if(fit)A.fit(mapSt.groups.map(g=>({lat:g.lat,lng:g.lng})));listUpd()}
-function listUpd(){const L=document.getElementById('maplist'),B=document.getElementById('mapbar');if(!L||!mapSt)return;
- const bad=mapSt.places.filter(p=>!geoOk(p.ref)&&geoFail.has(p.loc)).length;
- L.innerHTML=mapSt.places.map((p,i)=>{const ok=geoOk(p.ref),st=ok?'':geoFail.has(p.loc)?'⚠️':'⏳';
-  return `<div class="mrow" data-mp="focus" data-i="${i}"><span class="mi">${p.icon}</span><div class="mt"><b>${esc(p.title)}</b><small>${esc(p.sub)}</small><small>📍 ${esc(p.loc)}</small></div><span class="ms" title="${ok?'':geoFail.has(p.loc)?'Ort nicht gefunden':'Wird gesucht …'}">${st}</span><a class="mg" href="${gmapsUrl(p.loc)}" target="_blank" rel="noopener" aria-label="In Google Maps öffnen">↗</a></div>`}).join('');
+function listUpd(){const L=document.getElementById('maplist'),B=document.getElementById('mapbar');if(!L||!mapSt)return;const hid=new Set(mapSt.t.mapHide||[]);
+ const bad=mapSt.places.filter(p=>!hid.has(p.dk)&&!geoOk(p.ref)&&geoFail.has(p.loc)).length;
+ L.innerHTML=mapSt.places.map((p,i)=>{if(hid.has(p.dk))return'';const ok=geoOk(p.ref),st=ok?'':geoFail.has(p.loc)?'⚠️':'⏳';
+  return `<div class="mrow" data-mp="focus" data-i="${i}"><span class="mnum" style="background:${dayCol(p)}">${p.dk==='notes'?'📝':p.num}</span><div class="mt"><b>${p.icon} ${esc(p.title)}</b><small>${esc(p.sub)}</small><small>📍 ${esc(p.loc)}</small></div><span class="ms" title="${ok?'':geoFail.has(p.loc)?'Ort nicht gefunden':'Wird gesucht …'}">${st}</span><a class="mg" href="${gmapsUrl(p.loc)}" target="_blank" rel="noopener" aria-label="In Google Maps öffnen">↗</a></div>`}).join('');
  if(B)B.innerHTML=mapSt.groups.length>1?'<button class="g" data-mp="fit">🔍 Alle Pins zeigen</button>':'';
  if(B&&bad)B.innerHTML+='<button class="g" data-mp="retry">↻ Nicht gefundene erneut suchen</button>'}
 function mapDestroy(){mapTok++;if(mapSt){try{mapSt.A.destroy()}catch(e){}}mapSt=null}
@@ -655,7 +646,10 @@ async function mapBoot(){
 
 /* --- Klicks: Karte-Buttons, Liste --- */
 $.addEventListener('click',e=>{const el=e.target.closest('[data-mp]');if(!el||e.target.closest('a'))return;const a=el.dataset.mp,t=S.trips.find(x=>x.id===cur);if(!t)return;
- if(a==='goE'||a==='goN'){mapFocus=el.dataset.id;t.tab='map';save();scrollTo(0,0);render()}
+ if(a==='tgd'||a==='tgall'){const pl=mapSt?mapSt.places:collectPlaces(t),dks=[...new Set(pl.map(p=>p.dk))];let h=new Set(t.mapHide||[]);
+  if(a==='tgd'){const d=el.dataset.d;h.has(d)?h.delete(d):h.add(d)}else{h=dks.every(k=>!h.has(k))?new Set(dks):new Set()}
+  t.mapHide=[...h];save();if(mapSt){mapChipsUpd();paint(true);const n=mapSt.groups.reduce((c,g)=>c+g.items.length,0);setMsg(dks.every(k=>h.has(k))?'Alle Tage ausgeblendet – Tage oben antippen.':n+' Ort(e) auf der Karte.')}}
+ else if(a==='goE'||a==='goN'){mapFocus=el.dataset.id;if(t.mapHide&&t.mapHide.length){const id=el.dataset.id,dk=Object.keys(t.days).find(d=>(t.days[d]||[]).some(x=>x.id===id))||'notes';t.mapHide=t.mapHide.filter(x=>x!==dk)};mapFocus=el.dataset.id;t.tab='map';save();scrollTo(0,0);render()}
  else if(a==='fit'){if(mapSt)mapSt.A.fit(mapSt.groups.map(g=>({lat:g.lat,lng:g.lng})))}
  else if(a==='retry'){geoFail.clear();render()}
  else if(a==='focus'&&mapSt){const p=mapSt.places[+el.dataset.i];if(!p)return;
@@ -700,5 +694,167 @@ document.addEventListener('input',e=>{if(e.target.dataset&&e.target.dataset.tk){
 const _r2=render;
 render=function(){mapDestroy();_r2();mapBoot()};
 
+</script>
+<script>
+/* ===================== Wetter-Tab (Open-Meteo, ohne Schlüssel) ===================== */
+(function(){const st=document.createElement('style');st.textContent=
+'.wxc{padding:12px 14px}.wxc .wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}.wxc .wh b{font-size:15px}.wxc .wt{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--ac2)}'+
+'.wxm{display:flex;align-items:center;gap:12px;margin-top:8px}.wxi{font-size:40px;line-height:1}.wxm b{font-size:22px}.wxlo{color:var(--mut);font-weight:400;font-size:17px}.wxm small{display:block;color:var(--mut);font-size:13px}'+
+'.wxd{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:14px;color:var(--tx)}'+
+'.wxl{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;padding-top:9px;border-top:1px solid var(--bd);font-size:14px}.wxl span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wxl small{color:var(--mut)}.wxl button{flex:none;font-size:13px;padding:5px 10px}'+
+'.wxp{margin-top:8px}.wxch{display:flex;flex-wrap:wrap;gap:6px}.wxch button{font-size:13px;background:var(--bg);color:var(--tx);border:1px solid var(--bd);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wxch button.on{background:var(--ac);color:var(--onac);border-color:var(--ac)}'+
+'.wxman{display:flex;gap:6px;margin-top:8px}.wxman input{flex:1;min-width:0}';
+document.head.append(st)})();
+const WXC={};try{Object.assign(WXC,JSON.parse(LS.get('wx_cache')||'{}'))}catch(e){}
+const wxOpen=new Set();let wxTok=0,wxSt={loading:false,err:false};
+const wxPersist=()=>{const lim=Date.now()-5*864e5,ks=Object.keys(WXC);ks.forEach(k=>{if(WXC[k].ts<lim)delete WXC[k]});const r=Object.keys(WXC);if(r.length>900)r.slice(0,r.length-900).forEach(k=>delete WXC[k]);LS.set('wx_cache',JSON.stringify(WXC))};
+const wxKey=(la,ln)=>(+la).toFixed(2)+','+(+ln).toFixed(2);
+const wxAdd=(d,n)=>{const x=new Date(d+'T00:00');return iso(new Date(x.getFullYear(),x.getMonth(),x.getDate()+n))};
+const WMO=c=>c===0?['☀️','Klar']:c===1?['🌤️','Überwiegend klar']:c===2?['⛅','Teils bewölkt']:c===3?['☁️','Bedeckt']:(c===45||c===48)?['🌫️','Nebel']:(c>=51&&c<=55)?['🌦️','Nieselregen']:(c===56||c===57)?['🌧️','Gefrierender Nieselregen']:c===61?['🌧️','Leichter Regen']:c===63?['🌧️','Regen']:c===65?['🌧️','Starker Regen']:(c===66||c===67)?['🌧️','Gefrierender Regen']:c===71?['🌨️','Leichter Schneefall']:c===73?['🌨️','Schneefall']:c===75?['❄️','Starker Schneefall']:c===77?['🌨️','Schneegriesel']:c===80?['🌦️','Leichte Schauer']:c===81?['🌧️','Schauer']:c===82?['⛈️','Heftige Schauer']:(c===85||c===86)?['🌨️','Schneeschauer']:c===95?['⛈️','Gewitter']:(c===96||c===99)?['⛈️','Gewitter mit Hagel']:['🌡️','–'];
+const wxClim=(tx,pr)=>tx<=1&&pr>=.5?['🌨️','Schnee möglich']:pr>=4?['🌧️','Meist regnerisch']:pr>=1.5?['🌦️','Schauer möglich']:pr>=.5?['⛅','Wechselhaft']:['☀️','Meist trocken'];
+const WXD='weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max';
+async function wxJ(u){const r=await fetch(u);if(!r.ok)throw new Error('wx '+r.status);return r.json()}
+const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+async function wxLoad(la,ln,dates){
+ const k0=wxKey(la,ln),now=Date.now(),lo=wxAdd(today,-90),hi=wxAdd(today,15);
+ const need=dates.filter(d=>{const c=WXC[k0+'|'+d];return !(c&&(c.k!=='fc'||now-c.ts<3*36e5))}).sort();if(!need.length)return;
+ const fc=need.filter(d=>d>=lo&&d<=hi),ar=need.filter(d=>d<lo),cl=need.filter(d=>d>hi),base=`latitude=${la}&longitude=${ln}&timezone=auto`,rng=a=>`&start_date=${a[0]}&end_date=${a[a.length-1]}`,jobs=[];
+ const put=(d,o)=>{WXC[k0+'|'+d]=Object.assign({ts:now},o)};
+ const direct=(j,kind)=>j.daily.time.forEach((d,i)=>{const g=k=>j.daily[k]?j.daily[k][i]:null;if(g('temperature_2m_max')==null)return;put(d,{k:kind,tmax:g('temperature_2m_max'),tmin:g('temperature_2m_min'),pr:g('precipitation_sum'),pp:g('precipitation_probability_max'),wind:g('wind_speed_10m_max'),code:g('weather_code')})});
+ if(fc.length)jobs.push(wxJ(`https://api.open-meteo.com/v1/forecast?${base}&daily=${WXD},precipitation_probability_max${rng(fc)}`).then(j=>direct(j,'fc')));
+ if(ar.length)jobs.push(wxJ(`https://archive-api.open-meteo.com/v1/archive?${base}&daily=${WXD}${rng(ar)}`).then(j=>direct(j,'ar')));
+ if(cl.length)jobs.push((async()=>{const by=+cl[0].slice(0,4),Y=new Date().getFullYear(),acc={};cl.forEach(d=>acc[d]={tx:[],tn:[],pr:[],w:[]});let okc=0;
+  await Promise.all([1,2,3].map(async n=>{const map={};cl.forEach(d=>{map[(Y-n+(+d.slice(0,4)-by))+'-'+(d.slice(5)==='02-29'?'02-28':d.slice(5))]=d});const sds=Object.keys(map).sort();
+   if(sds[sds.length-1]>wxAdd(today,-7)||(new Date(sds[sds.length-1])-new Date(sds[0]))/864e5>370)return;
+   try{const j=await wxJ(`https://archive-api.open-meteo.com/v1/archive?${base}&daily=${WXD}${rng(sds)}`);okc++;
+    j.daily.time.forEach((sd,i)=>{const d=map[sd];if(!d)return;const a=acc[d],g=k=>j.daily[k]?j.daily[k][i]:null;if(g('temperature_2m_max')!=null)a.tx.push(g('temperature_2m_max'));if(g('temperature_2m_min')!=null)a.tn.push(g('temperature_2m_min'));if(g('precipitation_sum')!=null)a.pr.push(g('precipitation_sum'));if(g('wind_speed_10m_max')!=null)a.w.push(g('wind_speed_10m_max'))})}catch(e){}}));
+  if(!okc)throw new Error('cl');cl.forEach(d=>{const a=acc[d];if(a.tx.length)put(d,{k:'cl',tmax:avg(a.tx),tmin:avg(a.tn),pr:avg(a.pr),wind:avg(a.w)})})})());
+ const rs=await Promise.allSettled(jobs);wxPersist();if(rs.length&&rs.every(r=>r.status==='rejected'))throw new Error('wx')}
+/* Ort pro Tag: 1. eigener Ort  2. Orte aus den Einträgen des Tages (Auswahl möglich)  3. Reiseziel */
+const wxDest=t=>t.wxDest&&t.wxDest.q===t.dest&&isFinite(t.wxDest.lat)?t.wxDest:null;
+function wxCands(t,d){const out=[],seen={};(t.days[d]||[]).forEach(e=>{const q=String(e.loc||'').trim();if(!q||seen[q])return;seen[q]=1;out.push({key:'e:'+q,name:q,geo:geoOk(e)?e.geo:null})});return out}
+function wxPick(t,d){const man=(t.wx||{})[d],cands=wxCands(t,d),sel=(t.wxSel||{})[d],dg=wxDest(t);
+ if(man&&isFinite(man.lat))return{src:'man',name:man.q,lat:man.lat,lng:man.lng,cands};
+ if(sel!=='dest'){const c=cands.find(x=>x.key===sel)||cands[0];if(c)return{src:'entry',name:c.name,key:c.key,lat:c.geo?c.geo.lat:null,lng:c.geo?c.geo.lng:null,cands}}
+ return{src:'dest',name:t.dest,lat:dg?dg.lat:null,lng:dg?dg.lng:null,cands}}
+function wxCard(t,d,i){const p=wxPick(t,d),dat=p.lat!=null?WXC[wxKey(p.lat,p.lng)+'|'+d]:null,op=wxOpen.has(d),dn=(t.dn||{})[d];let main;
+ if(dat){const w=dat.k==='cl'?wxClim(dat.tmax,dat.pr||0):WMO(dat.code),f1=v=>v==null?'–':(+v).toFixed(1).replace('.',',');
+  main=`<div class="wxm"><span class="wxi">${w[0]}</span><div><b>${Math.round(dat.tmax)}° <span class="wxlo">/ ${Math.round(dat.tmin)}°</span></b><small>${w[1]}${dat.k==='cl'?' · Ø der letzten Jahre':''}</small></div></div><div class="wxd"><span>💧 ${f1(dat.pr)} mm${dat.pp!=null?' · '+dat.pp+' %':''}</span><span>💨 ${dat.wind==null?'–':Math.round(dat.wind)} km/h</span></div>`}
+ else main=`<div class="wxm"><small>${p.lat==null?(p.src==='entry'&&geoFail.has(p.name)?'Ort nicht gefunden – bitte anderen Ort wählen.':'Ort wird gesucht …'):wxSt.loading?'Wetter wird geladen …':navigator.onLine?'Keine Daten für diesen Tag.':'Offline – noch keine gespeicherten Werte.'}</small></div>`;
+ const tag=p.src==='man'?'eigener Ort':p.src==='dest'?'Reiseziel':'aus Eintrag';
+ let panel='';if(op){const E=esc;panel=`<div class="wxp"><div class="wxch">${p.cands.map(c=>`<button class="${p.src==='entry'&&p.key===c.key?'on':''}" data-wx="sel" data-d="${d}" data-k="${E(c.key)}">📍 ${E(c.name)}</button>`).join('')}<button class="${p.src==='dest'?'on':''}" data-wx="sel" data-d="${d}" data-k="dest">🌍 ${E(t.dest)}</button></div><div class="wxman"><input data-wxin data-d="${d}" placeholder="Eigenen Ort eingeben …" value="${p.src==='man'?E(p.name):''}"><button data-wx="man" data-d="${d}">OK</button></div>${p.src==='man'?`<button class="g" style="margin-top:8px;font-size:13px" data-wx="rst" data-d="${d}">↺ Zurücksetzen</button>`:''}</div>`}
+ return `<div class="card wxc${d===today?' today-card':''}"><div class="wh"><b>${d===today?'<span class="wt">Heute</span> · ':''}Tag ${i+1} · ${fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})}${dn?' · '+esc(dn):''}</b></div>${main}<div class="wxl"><span>📍 ${esc(p.name)} <small>· ${tag}${p.cands.length>1&&p.src==='entry'?' · '+p.cands.length+' Orte':''}</small></span><button class="g" data-wx="open" data-d="${d}">${op?'Fertig':'Ort ändern'}</button></div>${panel}</div>`}
+function weatherView(t){t.wx=t.wx||{};t.wxSel=t.wxSel||{};
+ return `<div class="pad"><div class="mapnote" style="margin-top:0">Wetterdaten von Open-Meteo. Bis 16 Tage im Voraus gibt es eine Vorhersage; für spätere Tage zeigt die App Durchschnittswerte der letzten Jahre.</div>${days(t).map((d,i)=>wxCard(t,d,i)).join('')}</div>`}
+function wxPaint(t){if(!t||cur!==t.id||t.tab!=='weather')return;const b=document.querySelector('.tabbody');if(!b)return;const ae=document.activeElement;if(ae&&ae.hasAttribute&&ae.hasAttribute('data-wxin'))return;b.innerHTML=weatherView(t)}
+async function wxFetchAll(t,tok){const G={};days(t).forEach(d=>{const p=wxPick(t,d);if(p.lat==null)return;const k=wxKey(p.lat,p.lng);(G[k]=G[k]||{lat:p.lat,lng:p.lng,ds:[]}).ds.push(d)});
+ wxSt.loading=true;wxSt.err=false;
+ for(const g of Object.values(G)){if(tok!==wxTok)return;try{await wxLoad(g.lat,g.lng,g.ds)}catch(e){wxSt.err=true}if(tok!==wxTok)return;wxPaint(t)}
+ wxSt.loading=false;wxPaint(t)}
+async function wxBoot(){const t=S.trips.find(x=>x.id===cur);if(!t||t.tab!=='weather')return;const tok=++wxTok;wxPaint(t);
+ if(!navigator.onLine){wxSt.loading=false;return}
+ try{
+  if(!wxDest(t)&&!geoFail.has(t.dest)){const r=await geoQ(t.dest);if(tok!==wxTok)return;if(r){t.wxDest={q:t.dest,lat:r.lat,lng:r.lng};save()}else geoFail.add(t.dest);wxPaint(t)}
+  await wxFetchAll(t,tok);if(tok!==wxTok)return;
+  const miss=[];days(t).forEach(d=>wxCands(t,d).forEach(c=>{if(!c.geo&&!geoFail.has(c.name)&&!miss.includes(c.name))miss.push(c.name)}));
+  if(!miss.length)return;
+  for(const q of miss){if(tok!==wxTok)return;const r=await geoFor(q,t);if(tok!==wxTok)return;
+   if(r){Object.values(t.days).flat().forEach(e=>{if(String(e.loc||'').trim()===q)e.geo={q,lat:r.lat,lng:r.lng}});save()}else geoFail.add(q);wxPaint(t)}
+  await wxFetchAll(t,tok)}catch(e){wxSt.loading=false;wxPaint(t)}}
+$.addEventListener('click',async e=>{const el=e.target.closest('[data-wx]');if(!el)return;const t=S.trips.find(x=>x.id===cur);if(!t)return;const a=el.dataset.wx,d=el.dataset.d;t.wx=t.wx||{};t.wxSel=t.wxSel||{};
+ if(a==='open'){wxOpen.has(d)?wxOpen.delete(d):wxOpen.add(d);wxPaint(t)}
+ else if(a==='sel'){delete t.wx[d];t.wxSel[d]=el.dataset.k;save();wxPaint(t);wxBoot()}
+ else if(a==='rst'){delete t.wx[d];delete t.wxSel[d];save();wxPaint(t);wxBoot()}
+ else if(a==='man'){const inp=$.querySelector(`[data-wxin][data-d="${d}"]`),q=inp?inp.value.trim():'';if(!q)return;if(!navigator.onLine)return toast('Offline – Ort kann gerade nicht gesucht werden');
+  el.disabled=true;let r=null;try{r=await geoFor(q,t)}catch(err){}
+  if(!r){el.disabled=false;return toast('Ort nicht gefunden – bitte genauer eingeben')}
+  t.wx[d]={q,lat:r.lat,lng:r.lng};delete t.wxSel[d];save();if(document.activeElement)document.activeElement.blur();wxPaint(t);wxBoot()}});
+$.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.hasAttribute&&e.target.hasAttribute('data-wxin')){const b=$.querySelector(`[data-wx="man"][data-d="${e.target.dataset.d}"]`);b&&b.click()}});
+$.addEventListener('focusout',e=>{if(e.target.hasAttribute&&e.target.hasAttribute('data-wxin')){const t=S.trips.find(x=>x.id===cur);setTimeout(()=>wxPaint(t),150)}});
+
+/* ===================== PDF-Export (A4 oder Handy-Format) ===================== */
+function pdfDlg(t){if(!t)return;const o=document.createElement('div');o.className='ov dim';
+ o.innerHTML='<div class="card add sheet"><b>Reise als PDF</b><small style="color:var(--mut)">Wähle das Format. Danach kannst du das PDF teilen oder speichern.</small><label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px;margin:4px 0"><input id="pdfn" type="checkbox" checked style="width:auto"> Notizen mit aufnehmen</label><button data-p="a4">📄 A4 – zum Drucken &amp; Verschicken</button><button data-p="phone">📱 Handy-Format – fürs Display optimiert</button><button class="g" data-p="x">Abbrechen</button></div>';
+ document.body.append(o);
+ o.onclick=async ev=>{const b=ev.target.closest('[data-p]');if(!b){if(ev.target===o)o.remove();return}const m=b.dataset.p;if(m==='x'){o.remove();return}
+  const withNotes=o.querySelector('#pdfn').checked;o.querySelectorAll('button').forEach(x=>x.disabled=true);b.textContent='⏳ PDF wird erstellt …';
+  try{const bytes=await pdfBuild(t,m,withNotes);o.remove();const nm='Reise_'+(t.dest||'Plan').replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_')+(m==='a4'?'_A4':'_Handy')+'.pdf';if(await saveBlob(nm,bytes,'application/pdf'))toast('PDF bereit')}
+  catch(err){console.error(err);o.remove();toast('PDF konnte nicht erstellt werden')}}}
+function pdfWrite(pages,pw,ph){const enc=new TextEncoder(),parts=[],off=[];let len=0;const push=b=>{if(typeof b==='string')b=enc.encode(b);parts.push(b);len+=b.length};
+ const n=pages.length;push('%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n');
+ off[1]=len;push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+ off[2]=len;push('2 0 obj\n<< /Type /Pages /Count '+n+' /Kids ['+pages.map((_,i)=>(3+i*3)+' 0 R').join(' ')+'] >>\nendobj\n');
+ pages.forEach((p,i)=>{const a=3+i*3,c=a+1,im=a+2,cs='q '+pw+' 0 0 '+ph+' 0 0 cm /Im0 Do Q';
+  off[a]=len;push(a+' 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 '+pw+' '+ph+'] /Resources << /XObject << /Im0 '+im+' 0 R >> >> /Contents '+c+' 0 R >>\nendobj\n');
+  off[c]=len;push(c+' 0 obj\n<< /Length '+cs.length+' >>\nstream\n'+cs+'\nendstream\nendobj\n');
+  off[im]=len;push(im+' 0 obj\n<< /Type /XObject /Subtype /Image /Width '+p.w+' /Height '+p.h+' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length '+p.d.length+' >>\nstream\n');push(p.d);push('\nendstream\nendobj\n')});
+ const N=3+n*3,xr=len;let x='xref\n0 '+N+'\n0000000000 65535 f \n';for(let i=1;i<N;i++)x+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+ push(x+'trailer\n<< /Size '+N+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF');
+ const out=new Uint8Array(len);let q=0;parts.forEach(b=>{out.set(b,q);q+=b.length});return out}
+const pdfMix=(a,b,p)=>{const f=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)),A=f(a),B=f(b);return '#'+A.map((v,i)=>Math.round(v*(1-p)+B[i]*p).toString(16).padStart(2,'0')).join('')};
+const pdfImg=src=>new Promise(res=>{if(!src)return res(null);const im=new Image();if(!/^data:/.test(src))im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src});
+async function pdfBuild(t,mode,withNotes){
+ const A4=mode==='a4',CW=A4?794:390,u=(A4?1550:1080)/CW,W=Math.round(CW*u),H=A4?Math.round(W*1.41421):Math.round(W*2.1667);
+ const th=THEMES.find(x=>x.id===(window._themeId||'flieder'))||THEMES[0];
+ const C=A4?{bg:'#ffffff',card:'#ffffff',tx:th.dark?'#2f2a40':th.tx,mut:th.dark?'#7d7794':th.mut,bd:th.dark?'#e3e0ef':th.bd,ac:th.ac,ac2:th.dark?'#6b4fb0':th.ac2}:{bg:th.bg,card:th.card,tx:th.tx,mut:th.mut,bd:th.bd,ac:th.ac,ac2:th.ac2};
+ const M=(A4?36:16)*u,FOOT=(A4?44:38)*u,GAP=(A4?8:9)*u,PAD=(A4?11:12)*u,fs=A4?13:15,CWd=W-2*M;
+ const FF='system-ui,-apple-system,"Segoe UI",Roboto,"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif',font=(s,b)=>`${b?700:400} ${s*u}px ${FF}`;
+ const meas=document.createElement('canvas').getContext('2d');
+ const wrap=(txt,f,mw)=>{meas.font=f;const out=[];String(txt).split('\n').forEach(par=>{let line='';par.split(' ').forEach(w=>{const tr=line?line+' '+w:w;if(meas.measureText(tr).width<=mw){line=tr;return}if(line){out.push(line);line=''}
+  while(meas.measureText(w).width>mw&&w.length>1){let k=w.length-1;while(k>1&&meas.measureText(w.slice(0,k)).width>mw)k--;out.push(w.slice(0,k));w=w.slice(k)}line=w});out.push(line)});return out};
+ const TL=(txt,size,bold,color,mw,o)=>wrap(txt,font(size,bold),mw).map((s,i)=>({t:s,f:font(size,bold),c:color,h:size*1.38*u+(i===0&&o&&o.sp?o.sp*u:0),sp:i===0&&o&&o.sp?o.sp*u:0}));
+ const pages=[];let cv,cx,y=0,pageNo=0,curDay=null;
+ const limit=()=>H-FOOT;
+ const rr=(x,yy,w,h,r)=>{cx.beginPath();cx.moveTo(x+r,yy);cx.arcTo(x+w,yy,x+w,yy+h,r);cx.arcTo(x+w,yy+h,x,yy+h,r);cx.arcTo(x,yy+h,x,yy,r);cx.arcTo(x,yy,x+w,yy,r);cx.closePath()};
+ const flush=()=>{if(!cv)return;cx.font=font(fs-3,0);cx.fillStyle=C.mut;cx.textAlign='left';cx.fillText('World Planner · '+t.dest,M,H-(A4?20:16)*u);cx.textAlign='right';cx.fillText('Seite '+pageNo,W-M,H-(A4?20:16)*u);cx.textAlign='left';
+  const b=atob(cv.toDataURL('image/jpeg',.88).split(',')[1]),d=new Uint8Array(b.length);for(let i=0;i<b.length;i++)d[i]=b.charCodeAt(i);pages.push({d,w:W,h:H});cv.width=cv.height=0};
+ const newPage=()=>{flush();cv=document.createElement('canvas');cv.width=W;cv.height=H;cx=cv.getContext('2d');cx.fillStyle=C.bg;cx.fillRect(0,0,W,H);pageNo++;y=M;
+  if(curDay){cx.font=font(fs-2,1);cx.fillStyle=C.mut;cx.fillText(curDay+' – Fortsetzung',M,y+13*u);y+=26*u}};
+ const lh=ls=>ls.reduce((a,l)=>a+l.h,0);
+ const ensure=h=>{if(h>limit()-y&&y>M+1)newPage()};
+ function card(lines,o){o=o||{};const sw=o.strip?5*u:0,tp=PAD*.9;
+  if(lh(lines)+2*tp>limit()-y&&lh(lines)+2*tp<=limit()-M)newPage();
+  let i=0;while(i<lines.length){const avail=limit()-y;let j=i,h=tp*2;while(j<lines.length&&h+lines[j].h<=avail){h+=lines[j].h;j++}
+   if(j===i){if(y>M+1){newPage();continue}h+=lines[i].h;j=i+1}
+   if(!o.nb){cx.fillStyle=o.bg||C.card;rr(M,y,CWd,h,10*u);cx.fill();cx.lineWidth=u;cx.strokeStyle=C.bd;cx.stroke()}
+   if(o.strip){cx.save();rr(M,y,CWd,h,10*u);cx.clip();cx.fillStyle=o.strip;cx.fillRect(M,y,sw,h);cx.restore()}
+   let ty=y+tp;for(let k=i;k<j;k++){const l=lines[k];ty+=l.h;const bl=ty-(l.h-l.sp)*.27;cx.font=l.f;cx.fillStyle=l.c;cx.textAlign='left';cx.fillText(l.t,M+sw+PAD,bl);if(l.r){cx.font=l.r.f;cx.fillStyle=l.r.c;cx.textAlign='right';cx.fillText(l.r.t,M+CWd-PAD,bl);cx.textAlign='left'}}
+   y+=h+GAP;i=j;if(i<lines.length)newPage()}}
+ const mw=(strip)=>CWd-(strip?5*u:0)-2*PAD,mix=(a,b,p)=>pdfMix(a,b,p);
+ const SC={Abfahrt:'#8fbbe8',Ankunft:'#8ed1a8','Aktivitäten':'#f2cb6b','Übernachtung':'#b79be0'};
+ const soft=mix(C.tx,C.card,.25);
+ function entryLines(e){const w=mw(true),ls=[];const type=(ICON[e.type]||'📌')+' '+(e.type||'Eigener Eintrag');
+  ls.push({t:type,f:font(fs-2,0),c:C.mut,h:(fs-2)*1.4*u,sp:0,r:e.time?{t:e.time,f:font(fs+1,1),c:C.ac2}:null});
+  if(e.title)ls.push(...TL(e.title,fs+2,1,C.tx,w,{sp:1}));
+  if(e.loc)ls.push(...TL('📍 '+e.loc,fs-1,0,C.ac2,w,{sp:2}));
+  if(e.note)ls.push(...TL(e.note,fs-1,0,soft,w,{sp:3}));
+  const fl=(e.files||[]).map(f=>f.name);if(fl.length)ls.push(...TL('📎 '+fl.join(', '),fs-2,0,C.mut,w,{sp:3}));
+  return ls}
+ /* ---- Seite 1: Kopf ---- */
+ newPage();
+ {const h=(A4?150:210)*u,im=await pdfImg(t.img);cx.save();rr(M,y,CWd,h,16*u);cx.clip();
+  let hp=0;for(const c of String(t.id||''))hp+=c.charCodeAt(0);const pp=PAS[hp%PAS.length];
+  if(im){const r=Math.max(CWd/im.width,h/im.height),w=im.width*r,hh=im.height*r;cx.drawImage(im,M+(CWd-w)/2,y+(h-hh)/2,w,hh);const g=cx.createLinearGradient(0,y,0,y+h);g.addColorStop(0,'rgba(0,0,0,.25)');g.addColorStop(1,'rgba(0,0,0,.65)');cx.fillStyle=g;cx.fillRect(M,y,CWd,h)}
+  else{const g=cx.createLinearGradient(M,y,M+CWd,y+h);g.addColorStop(0,pp[0]);g.addColorStop(1,pp[1]);cx.fillStyle=g;cx.fillRect(M,y,CWd,h)}
+  const tc=im?'#ffffff':'#3a3550',ds=days(t),ne=Object.values(t.days).reduce((n,a)=>n+a.length,0),sub=fmt(t.from)+' – '+fmt(t.to)+' · '+ds.length+' Tage · '+ne+' Einträge';
+  const tl=TL(t.dest,A4?30:30,1,tc,CWd-2*PAD*1.6),sl=TL(sub,fs+1,0,tc,CWd-2*PAD*1.6);let ty=y+h-PAD*1.4-lh(sl)-lh(tl);
+  [...tl,...sl].forEach(l=>{ty+=l.h;cx.font=l.f;cx.fillStyle=l.c;cx.fillText(l.t,M+PAD*1.6,ty-l.h*.27)});cx.restore();y+=h+GAP*1.6}
+ /* ---- Tage ---- */
+ const ds=days(t);
+ for(let i=0;i<ds.length;i++){const d=ds[i],es=t.days[d]||[],name=(t.dn||{})[d];curDay=null;
+  const hl=[...TL('Tag '+(i+1)+'  ·  '+new Date(d+'T00:00').toLocaleDateString('de-DE',{weekday:'long'})+', '+fmt(d),fs+1,1,C.tx,mw(true))];if(name)hl.push(...TL(name,fs,0,C.ac2,mw(true),{sp:1}));
+  const first=es.length?Math.min(lh(entryLines(es[0]))+PAD*1.8,150*u):30*u;ensure(lh(hl)+PAD*1.8+first+GAP);
+  card(hl,{bg:mix(C.ac,C.bg,A4?.6:.72),strip:C.ac});curDay='Tag '+(i+1)+' · '+fmt(d,{day:'2-digit',month:'2-digit'});
+  if(!es.length)card(TL('– noch nichts geplant –',fs-2,0,C.mut,mw(false)),{nb:1});
+  es.forEach(e=>card(entryLines(e),{strip:SC[e.type]||'#c3c0cf'}))}
+ /* ---- Notizen ---- */
+ const ns=withNotes?(t.notes||[]).filter(n=>n.title||n.text||n.loc):[];
+ if(ns.length){curDay=null;y+=GAP;ensure(100*u);card(TL('📝  Notizen',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,A4?.6:.72),strip:C.ac});curDay='Notizen';
+  ns.forEach(n=>{const ls=[];if(n.title)ls.push(...TL(n.title,fs+2,1,C.tx,mw(true)));if(n.loc)ls.push(...TL('📍 '+n.loc,fs-1,0,C.ac2,mw(true),{sp:2}));if(n.text)ls.push(...TL(n.text,fs-1,0,soft,mw(true),{sp:3}));card(ls,{strip:'#e9a3bd'})})}
+ flush();
+ return pdfWrite(pages,A4?595.28:270,A4?841.89:Math.round(270*H/W*100)/100)}
+
+/* Wetter-Start nach jedem Neuaufbau */
+const _r3=render;render=function(){_r3();wxBoot()};
 </script>
 </body></html>
