@@ -126,7 +126,7 @@ function extra(t){let h='';const sh=(b,bd)=>h+=`<div class="ov dim"${bd?` data-b
 if(stg){const cu=window._themeId||'flieder',sw=d=>THEMES.filter(x=>!!x.dark===d).map(x=>`<div class="swi"><button class="sw${x.id===cu?' on':''}" data-a="theme" data-id="${x.id}" title="${x.name}" aria-label="${x.name}" style="background:linear-gradient(135deg,${x.bg} 50%,${x.ac} 50%)"></button><small>${x.name}</small></div>`).join('');
  sh(`<b>Einstellungen</b><label>Konto</label><button class="g" data-pg="auth" style="width:100%;text-align:left">${authLabel()}</button><label>Farben</label><div class="stg-h">Hell</div><div class="swg">${sw(false)}</div><div class="stg-h">Dunkel</div><div class="swg">${sw(true)}</div><label>Karte</label><input data-gk="1" placeholder="Google-Maps-API-Schlüssel (optional)" value="${esc(LS.get('gmaps_key')||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="stg-h">Ohne Schlüssel wird OpenStreetMap als Karte genutzt. Mit Schlüssel (Maps JavaScript API + Geocoding API) die Google-Karte.</div><label>Karten-Kacheln (optional, nur OpenStreetMap-Karte)</label><input data-tk="1" placeholder="Eigene Kachel-URL, leer = Standard" value="${esc(LS.get('tile_url')||'')}" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="stg-h">Nur nötig, falls die Standardkarte nicht lädt. Beispiel CARTO mit kostenlosem Schlüssel: https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=DEIN_SCHLÜSSEL</div><label>Sprache</label><select aria-label="Sprache"><option>Deutsch</option></select><div class="stg-h">Weitere Sprachen folgen später.</div><button class="g" data-a="stgx" style="margin-top:12px;width:100%">Schließen</button>`,'stg')}
 if(pm&&t){h+=`<div class="ov dim" data-a="pmx"><div class="card add sheet"><b>Hinzufügen</b><div class="pmenu">${TYPES.map(k=>`<button data-a="addE" data-d="${pm}" data-k="${k}">${ICON[k]||'📌'} ${k}</button>`).join('')}</div></div></div>`}
-if(om&&t)h+=`<div class="ov dim option-backdrop" data-a="optx"><div class="card add sheet"><b>Optionen</b><div class="pmenu"><button data-a="edT">✏️ Umbenennen &amp; Datum ändern</button><button data-a="pdf">📄 Als PDF teilen / speichern</button><button data-a="files">📎 Anhänge</button><button data-a="del">🗑 Reise löschen</button></div></div></div>`;
+if(om&&t)h+=`<div class="ov dim option-backdrop" data-a="optx"><div class="card add sheet"><b>Optionen</b><div class="pmenu"><button data-a="edT">✏️ Umbenennen &amp; Datum ändern</button><button data-a="pdf">📄 Als PDF teilen</button><button data-a="files">📎 Anhänge</button><button data-a="del">🗑 Reise löschen</button></div></div></div>`;
 if(ed&&t)sh(`<b>Reise bearbeiten</b><div><label>Reiseziel</label><input id="ed_d" value="${esc(t.dest)}"></div><div><label>Von</label><input id="ed_f" type="date" value="${t.from}"></div><div><label>Bis</label><input id="ed_t" type="date" value="${t.to}"></div><label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px"><input id="ed_m" type="checkbox" checked style="width:auto"> Einträge mit neuem Startdatum verschieben</label><div style="display:flex;gap:8px"><button data-a="saveT">Speichern</button><button class="g" data-a="edx">Abbrechen</button></div>`,'ed');
 if(cf)sh(`<b>${esc(cf.msg)}</b><div style="display:flex;gap:8px"><button data-a="cfy">${esc(cf.lbl||'Löschen')}</button><button class="g" data-a="cfn">Abbrechen</button></div>`,'cf');
 if(h)$.insertAdjacentHTML('beforeend',h);}
@@ -745,7 +745,7 @@ function wxCard(t,d,i){const p=wxPick(t,d),dat=p.lat!=null?WXC[wxKey(p.lat,p.lng
  let panel='';if(op){const E=esc;panel=`<div class="wxp"><div class="wxch">${p.cands.map(c=>`<button class="${p.src==='entry'&&p.key===c.key?'on':''}" data-wx="sel" data-d="${d}" data-k="${E(c.key)}">📍 ${E(c.name)}</button>`).join('')}<button class="${p.src==='dest'?'on':''}" data-wx="sel" data-d="${d}" data-k="dest">🌍 ${E(t.dest)}</button></div><div class="wxman"><input data-wxin data-d="${d}" placeholder="Eigenen Ort eingeben …" value="${p.src==='man'?E(p.name):''}"><button data-wx="man" data-d="${d}">OK</button></div>${p.src==='man'?`<button class="g" style="margin-top:8px;font-size:13px" data-wx="rst" data-d="${d}">↺ Zurücksetzen</button>`:''}</div>`}
  return `<div class="card wxc${d===today?' today-card':''}"><div class="wh"><b>${d===today?'<span class="wt">Heute</span> · ':''}Tag ${i+1} · ${fmt(d,{weekday:'short',day:'2-digit',month:'2-digit'})}${dn?' · '+esc(dn):''}</b></div>${main}<div class="wxl"><span>📍 ${esc(p.name)} <small>· ${tag}${p.cands.length>1&&p.src==='entry'?' · '+p.cands.length+' Orte':''}</small></span><button class="g" data-wx="open" data-d="${d}">${op?'Fertig':'Ort ändern'}</button></div>${panel}</div>`}
 function weatherView(t){t.wx=t.wx||{};t.wxSel=t.wxSel||{};
- return `<div class="pad"><div class="mapnote" style="margin-top:0">Wetterdaten von Open-Meteo. Bis 16 Tage im Voraus gibt es eine Vorhersage; für spätere Tage zeigt die App Durchschnittswerte der letzten Jahre.</div>${days(t).map((d,i)=>wxCard(t,d,i)).join('')}</div>`}
+ return `<div class="pad">${days(t).map((d,i)=>wxCard(t,d,i)).join('')}</div>`}
 function wxPaint(t){if(!t||cur!==t.id||t.tab!=='weather')return;const b=document.querySelector('.tabbody');if(!b)return;const ae=document.activeElement;if(ae&&ae.hasAttribute&&ae.hasAttribute('data-wxin'))return;b.innerHTML=weatherView(t)}
 async function wxFetchAll(t,tok){const G={};days(t).forEach(d=>{const p=wxPick(t,d);if(p.lat==null)return;const k=wxKey(p.lat,p.lng);(G[k]=G[k]||{lat:p.lat,lng:p.lng,ds:[]}).ds.push(d)});
  wxSt.loading=true;wxSt.err=false;
@@ -774,11 +774,11 @@ $.addEventListener('focusout',e=>{if(e.target.hasAttribute&&e.target.hasAttribut
 
 /* ===================== PDF-Export (A4 oder Handy-Format) ===================== */
 function pdfDlg(t){if(!t)return;const o=document.createElement('div');o.className='ov dim';
- o.innerHTML='<div class="card add sheet"><b>Reise als PDF</b><small style="color:var(--mut)">Wähle das Format. Danach kannst du das PDF teilen oder speichern.</small><label style="display:flex;gap:8px;align-items:center;color:var(--tx);font-size:14px;margin:4px 0"><input id="pdfn" type="checkbox" checked style="width:auto"> Notizen mit aufnehmen</label><button data-p="a4">📄 A4 – zum Drucken &amp; Verschicken</button><button data-p="phone">📱 Handy-Format – fürs Display optimiert</button><button class="g" data-p="x">Abbrechen</button></div>';
+ o.innerHTML='<div class="card add sheet"><b>Als PDF teilen</b><small style="color:var(--mut)">Wähle das Format. Danach kannst du das PDF teilen oder speichern.</small><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;color:var(--tx);font-size:14px;margin:4px 0"><span>Mit aufnehmen:</span><label style="display:flex;gap:6px;align-items:center"><input id="pdfn" type="checkbox" checked style="width:auto"> Notizen</label><label style="display:flex;gap:6px;align-items:center"><input id="pdff" type="checkbox" checked style="width:auto"> Anhänge</label></div><button data-p="a4">A4 - zum Drucken &amp; Verschicken</button><button data-p="phone">Mobile - fürs Display optimiert</button><button class="g" data-p="x">Abbrechen</button></div>';
  document.body.append(o);
  o.onclick=async ev=>{const b=ev.target.closest('[data-p]');if(!b){if(ev.target===o)o.remove();return}const m=b.dataset.p;if(m==='x'){o.remove();return}
-  const withNotes=o.querySelector('#pdfn').checked;o.querySelectorAll('button').forEach(x=>x.disabled=true);b.textContent='⏳ PDF wird erstellt …';
-  try{const bytes=await pdfBuild(t,m,withNotes);o.remove();const nm='Reise_'+(t.dest||'Plan').replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_')+(m==='a4'?'_A4':'_Handy')+'.pdf';if(await saveBlob(nm,bytes,'application/pdf'))toast('PDF bereit')}
+  const withNotes=o.querySelector('#pdfn').checked,withFiles=o.querySelector('#pdff').checked;o.querySelectorAll('button').forEach(x=>x.disabled=true);b.textContent='⏳ PDF wird erstellt …';
+  try{const bytes=await pdfBuild(t,m,withNotes,withFiles);o.remove();const nm='Reise_'+(t.dest||'Plan').replace(/[^a-zA-Z0-9äöüÄÖÜß]+/g,'_')+(m==='a4'?'_A4':'_Mobile')+'.pdf';if(await saveBlob(nm,bytes,'application/pdf'))toast('PDF bereit')}
   catch(err){console.error(err);o.remove();toast('PDF konnte nicht erstellt werden')}}}
 function pdfWrite(pages,pw,ph){const enc=new TextEncoder(),parts=[],off=[];let len=0;const push=b=>{if(typeof b==='string')b=enc.encode(b);parts.push(b);len+=b.length};
  const n=pages.length;push('%PDF-1.4\n%\u00e2\u00e3\u00cf\u00d3\n');
@@ -793,10 +793,10 @@ function pdfWrite(pages,pw,ph){const enc=new TextEncoder(),parts=[],off=[];let l
  const out=new Uint8Array(len);let q=0;parts.forEach(b=>{out.set(b,q);q+=b.length});return out}
 const pdfMix=(a,b,p)=>{const f=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)),A=f(a),B=f(b);return '#'+A.map((v,i)=>Math.round(v*(1-p)+B[i]*p).toString(16).padStart(2,'0')).join('')};
 const pdfImg=src=>new Promise(res=>{if(!src)return res(null);const im=new Image();if(!/^data:/.test(src))im.crossOrigin='anonymous';im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src});
-async function pdfBuild(t,mode,withNotes){
+async function pdfBuild(t,mode,withNotes,withFiles){
  const A4=mode==='a4',CW=A4?794:390,u=(A4?1550:1080)/CW,W=Math.round(CW*u),H=A4?Math.round(W*1.41421):Math.round(W*2.1667);
  const th=THEMES.find(x=>x.id===(window._themeId||'flieder'))||THEMES[0];
- const C=A4?{bg:'#ffffff',card:'#ffffff',tx:th.dark?'#2f2a40':th.tx,mut:th.dark?'#7d7794':th.mut,bd:th.dark?'#e3e0ef':th.bd,ac:th.ac,ac2:th.dark?'#6b4fb0':th.ac2}:{bg:th.bg,card:th.card,tx:th.tx,mut:th.mut,bd:th.bd,ac:th.ac,ac2:th.ac2};
+ const C={bg:'#ffffff',card:'#ffffff',tx:th.dark?'#2f2a40':th.tx,mut:th.dark?'#7d7794':th.mut,bd:th.dark?'#e3e0ef':th.bd,ac:th.ac,ac2:th.dark?'#6b4fb0':th.ac2};
  const M=(A4?36:16)*u,FOOT=(A4?44:38)*u,GAP=(A4?8:9)*u,PAD=(A4?11:12)*u,fs=A4?13:15,CWd=W-2*M;
  const FF='system-ui,-apple-system,"Segoe UI",Roboto,"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif',font=(s,b)=>`${b?700:400} ${s*u}px ${FF}`;
  const meas=document.createElement('canvas').getContext('2d');
@@ -828,7 +828,7 @@ async function pdfBuild(t,mode,withNotes){
   if(e.title)ls.push(...TL(e.title,fs+2,1,C.tx,w,{sp:1}));
   if(e.loc)ls.push(...TL('📍 '+e.loc,fs-1,0,C.ac2,w,{sp:2}));
   if(e.note)ls.push(...TL(e.note,fs-1,0,soft,w,{sp:3}));
-  const fl=(e.files||[]).map(f=>f.name);if(fl.length)ls.push(...TL('📎 '+fl.join(', '),fs-2,0,C.mut,w,{sp:3}));
+  const fl=withFiles?(e.files||[]).map(f=>f.name):[];if(fl.length)ls.push(...TL('📎 '+fl.join(', '),fs-2,0,C.mut,w,{sp:3}));
   return ls}
  /* ---- Seite 1: Kopf ---- */
  newPage();
@@ -844,13 +844,15 @@ async function pdfBuild(t,mode,withNotes){
  for(let i=0;i<ds.length;i++){const d=ds[i],es=t.days[d]||[],name=(t.dn||{})[d];curDay=null;
   const hl=[...TL('Tag '+(i+1)+'  ·  '+new Date(d+'T00:00').toLocaleDateString('de-DE',{weekday:'long'})+', '+fmt(d),fs+1,1,C.tx,mw(true))];if(name)hl.push(...TL(name,fs,0,C.ac2,mw(true),{sp:1}));
   const first=es.length?Math.min(lh(entryLines(es[0]))+PAD*1.8,150*u):30*u;ensure(lh(hl)+PAD*1.8+first+GAP);
-  card(hl,{bg:mix(C.ac,C.bg,A4?.6:.72),strip:C.ac});curDay='Tag '+(i+1)+' · '+fmt(d,{day:'2-digit',month:'2-digit'});
+  card(hl,{bg:mix(C.ac,C.bg,0.6),strip:C.ac});curDay='Tag '+(i+1)+' · '+fmt(d,{day:'2-digit',month:'2-digit'});
   if(!es.length)card(TL('– noch nichts geplant –',fs-2,0,C.mut,mw(false)),{nb:1});
   es.forEach(e=>card(entryLines(e),{strip:SC[e.type]||'#c3c0cf'}))}
  /* ---- Notizen ---- */
  const ns=withNotes?(t.notes||[]).filter(n=>n.title||n.text||n.loc):[];
- if(ns.length){curDay=null;y+=GAP;ensure(100*u);card(TL('📝  Notizen',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,A4?.6:.72),strip:C.ac});curDay='Notizen';
+ if(ns.length){curDay=null;y+=GAP;ensure(100*u);card(TL('📝  Notizen',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,0.6),strip:C.ac});curDay='Notizen';
   ns.forEach(n=>{const ls=[];if(n.title)ls.push(...TL(n.title,fs+2,1,C.tx,mw(true)));if(n.loc)ls.push(...TL('📍 '+n.loc,fs-1,0,C.ac2,mw(true),{sp:2}));if(n.text)ls.push(...TL(n.text,fs-1,0,soft,mw(true),{sp:3}));card(ls,{strip:'#e9a3bd'})})}
+ const gf=withFiles?(t.gfiles||[]).map(f=>f.name):[];
+ if(gf.length){curDay=null;y+=GAP;ensure(100*u);card(TL('📎  Allgemeine Anhänge',fs+1,1,C.tx,mw(true)),{bg:mix(C.ac,C.bg,.6),strip:C.ac});curDay='Anhänge';card(TL(gf.join(', '),fs-1,0,soft,mw(true)),{strip:'#c3c0cf'})}
  flush();
  return pdfWrite(pages,A4?595.28:270,A4?841.89:Math.round(270*H/W*100)/100)}
 
